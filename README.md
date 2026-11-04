@@ -12,7 +12,8 @@ and structured so a thin Expo app-store shell can wrap it later.
 | **Suggestions** ("Mom would love this") | Anyone paired with the person | Everyone paired **except the person** |
 | **My ideas** | You | **Only you** |
 
-- **Claiming:** "I'll get this" on any wishlist item or suggestion. Everyone except the recipient sees who claimed it. Mark it bought from your **Shopping list**.
+- **Bought:** "Mark bought" on any wishlist item, suggestion or private idea. Everyone except the recipient sees who bought it, so nobody doubles up.
+- **Layout:** home is your own wishlist; the **Family** tab lists everyone you're paired with. A person's page shows their wishlist with family suggestions stacked underneath, plus a **My ideas** tab.
 - **Pairing:** look someone up by email (instant; if they don't have an account yet, you're paired automatically when they sign up), or share your invite link.
 - **People without accounts:** add kids/grandparents you manage. Everyone paired with you can see and shop their lists.
 - **Items:** name, a free-form details box (size, color, notes), optional photo, optional link. Pasting a link fills in the name and picture.

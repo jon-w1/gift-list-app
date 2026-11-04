@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { claimItem, setClaimStatus, unclaimItem } from "@/app/actions";
+import { claimItem, unclaimItem } from "@/app/actions";
 import { itemImage } from "@/lib/photos";
 import type { Item } from "@/lib/types";
 import { SubmitButton } from "./SubmitButton";
@@ -53,31 +53,18 @@ export function ItemCard({ item, userId, canEdit, showClaims, showCreator, editH
           {!claim ? (
             <form action={claimItem} className="ml-auto">
               <input type="hidden" name="item_id" value={item.id} />
-              <SubmitButton className="btn-primary min-h-9 px-3.5 text-sm" pending="…">I&apos;ll get this</SubmitButton>
+              <SubmitButton className="btn-primary min-h-9 px-3.5 text-sm" pending="…">Mark bought</SubmitButton>
             </form>
           ) : mine ? (
             <>
-              <span className={`text-sm font-semibold ${claim.status === "purchased" ? "text-ok" : "text-ink"}`}>
-                {claim.status === "purchased" ? "✓ You bought this" : "You're getting this"}
-              </span>
-              <div className="ml-auto flex gap-1.5">
-                <form action={unclaimItem}>
-                  <input type="hidden" name="item_id" value={item.id} />
-                  <SubmitButton className="btn-ghost min-h-9 px-2.5 text-sm text-muted" pending="…">Undo</SubmitButton>
-                </form>
-                <form action={setClaimStatus}>
-                  <input type="hidden" name="item_id" value={item.id} />
-                  <input type="hidden" name="status" value={claim.status === "purchased" ? "claimed" : "purchased"} />
-                  <SubmitButton className="btn-secondary min-h-9 px-3 text-sm" pending="…">
-                    {claim.status === "purchased" ? "Not bought" : "Mark bought"}
-                  </SubmitButton>
-                </form>
-              </div>
+              <span className="text-sm font-semibold text-ok">✓ You bought this</span>
+              <form action={unclaimItem} className="ml-auto">
+                <input type="hidden" name="item_id" value={item.id} />
+                <SubmitButton className="btn-ghost min-h-9 px-2.5 text-sm text-muted" pending="…">Undo</SubmitButton>
+              </form>
             </>
           ) : (
-            <span className="text-sm font-medium text-muted">
-              {claim.status === "purchased" ? "Bought" : "Claimed"} by {claim.claimer?.display_name ?? "someone"}
-            </span>
+            <span className="text-sm font-medium text-muted">✓ Bought by {claim.claimer?.display_name ?? "someone"}</span>
           )}
         </div>
       )}

@@ -6,14 +6,12 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { deleteItem } from "@/app/actions";
 import type { Item } from "@/lib/types";
 
-const TAB = { wish: "wishlist", suggestion: "suggestions", idea: "ideas" } as const;
-
 export default async function EditItem({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { supabase, user } = await requireMe();
+  const { supabase, user, me } = await requireMe();
   const { data: item } = await supabase.from("items").select("*").eq("id", id).maybeSingle<Item>();
   if (!item) notFound();
-  const back = `/p/${item.person_id}?tab=${TAB[item.kind]}`;
+  const back = item.person_id === me.id ? "/" : `/p/${item.person_id}${item.kind === "idea" ? "?tab=ideas" : ""}`;
 
   return (
     <main className="safe-bottom">

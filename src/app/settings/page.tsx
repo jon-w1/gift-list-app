@@ -81,7 +81,7 @@ export default async function Settings() {
         <details className="card p-4">
           <summary className="cursor-pointer font-semibold text-accent">Delete my account</summary>
           <p className="mt-2 text-[14px] text-muted">
-            Permanently deletes your account, your wishlist, suggestions and ideas you&apos;ve written, your claims, and anyone you manage. Type DELETE to confirm.
+            Permanently deletes your account, your wishlist, suggestions and ideas you&apos;ve written, what you&apos;ve marked bought, and anyone you manage. Type DELETE to confirm.
           </p>
           <form action={deleteAccount} className="mt-3 flex gap-2">
             <input name="confirm" required className="input py-2" placeholder="DELETE" autoCapitalize="characters" autoComplete="off" />

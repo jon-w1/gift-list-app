@@ -54,7 +54,7 @@ export async function addManagedPerson(formData: FormData) {
   const name = str(formData.get("display_name"), 60);
   if (!name) return;
   const { data } = await supabase.from("people").insert({ display_name: name, managed_by: userId }).select("id").single();
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   if (data) redirect(`/p/${data.id}`);
 }
 
@@ -75,7 +75,7 @@ export async function connectByEmail(_prev: PairResult, formData: FormData): Pro
   const email = str(formData.get("email"), 320) ?? "";
   const { data, error } = await supabase.rpc("connect_by_email", { target_email: email });
   if (error) return { status: "error", email };
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return { ...(data as NonNullable<PairResult>), email };
 }
 
@@ -89,7 +89,7 @@ export async function acceptInvite(formData: FormData) {
   const { supabase } = await uid();
   const token = str(formData.get("token"), 64);
   const { data } = await supabase.rpc("accept_invite", { invite_token: token });
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   const res = data as { status: string; person_id?: string } | null;
   redirect(res?.person_id ? `/p/${res.person_id}` : "/");
 }
@@ -130,7 +130,7 @@ export async function saveItem(input: ItemInput): Promise<Result & { id?: string
   if (input.id) {
     const { error } = await supabase.from("items").update(fields).eq("id", input.id);
     if (error) return { ok: false, error: "Couldn't save that change." };
-    revalidatePath(`/p/${input.person_id}`);
+    revalidatePath("/", "layout");
     return { ok: true, id: input.id };
   }
 
@@ -140,7 +140,7 @@ export async function saveItem(input: ItemInput): Promise<Result & { id?: string
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: "Couldn't add that item." };
-  revalidatePath(`/p/${input.person_id}`);
+  revalidatePath("/", "layout");
   return { ok: true, id: data.id };
 }
 
@@ -162,16 +162,8 @@ export async function claimItem(formData: FormData) {
   const { supabase, userId } = await uid();
   const id = str(formData.get("item_id"), 64);
   if (!id) return;
-  await supabase.from("claims").insert({ item_id: id, claimed_by: userId });
-  revalidatePath("/", "layout");
-}
-
-export async function setClaimStatus(formData: FormData) {
-  const { supabase } = await uid();
-  const id = str(formData.get("item_id"), 64);
-  const status = formData.get("status") === "purchased" ? "purchased" : "claimed";
-  if (!id) return;
-  await supabase.from("claims").update({ status }).eq("item_id", id);
+  // One state: a claim row means "bought" (the old claimed/bought split was merged).
+  await supabase.from("claims").insert({ item_id: id, claimed_by: userId, status: "purchased" });
   revalidatePath("/", "layout");
 }
 

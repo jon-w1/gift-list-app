@@ -16,7 +16,7 @@ export default async function AddPeople() {
 
   return (
     <main className="safe-bottom">
-      <Header back="/" title="Add family" />
+      <Header back="/family" title="Add family" />
       <div className="space-y-8 px-4 pt-5">
         <section>
           <h2 className="font-semibold">Pair by email</h2>

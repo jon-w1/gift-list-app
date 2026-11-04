@@ -4,8 +4,6 @@ import { Header } from "@/components/Header";
 import { ItemForm } from "@/components/ItemForm";
 import type { ItemKind, Person } from "@/lib/types";
 
-const TAB: Record<ItemKind, string> = { wish: "wishlist", suggestion: "suggestions", idea: "ideas" };
-
 export default async function NewItem({ params, searchParams }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ kind?: string }>;
@@ -20,7 +18,7 @@ export default async function NewItem({ params, searchParams }: {
   const first = person.display_name.split(" ")[0];
   const isMe = person.user_id === user.id;
   const title = { wish: isMe ? "Add to my wishlist" : `Add to ${first}'s wishlist`, suggestion: `Suggest for ${first}`, idea: `Idea for ${first}` }[kind];
-  const back = `/p/${id}?tab=${TAB[kind]}`;
+  const back = isMe ? "/" : `/p/${id}${kind === "idea" ? "?tab=ideas" : ""}`;
 
   return (
     <main className="safe-bottom">

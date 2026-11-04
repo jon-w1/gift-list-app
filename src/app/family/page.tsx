@@ -1,0 +1,48 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireMe } from "@/lib/supabase/server";
+import { Avatar, Empty, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
+import type { Person } from "@/lib/types";
+
+export const metadata = { title: "Family" };
+
+export default async function Family() {
+  const { supabase, user, me } = await requireMe();
+  if (!me.onboarded) redirect("/welcome");
+
+  const { data: people } = await supabase.from("people").select("*").neq("id", me.id).order("display_name").returns<Person[]>();
+  const managed = (people ?? []).filter((p) => p.managed_by === user.id);
+  const others = (people ?? []).filter((p) => p.managed_by !== user.id);
+
+  return (
+    <main className={TAB_PAGE}>
+      <TopBar title="Family" right={<Link href="/people/add" className="btn-ghost px-3 text-accent">+ Add</Link>} />
+
+      <div className="px-4 pt-1">
+        {others.length + managed.length === 0 ? (
+          <Empty>
+            <p className="mb-3">No one here yet. Pair with family to see their lists.</p>
+            <Link href="/people/add" className="btn-primary">Add family</Link>
+          </Empty>
+        ) : (
+          <ul className="card divide-y divide-line overflow-hidden">
+            {[...others, ...managed].map((p) => (
+              <li key={p.id}>
+                <Link href={`/p/${p.id}`} className="flex items-center gap-3 px-4 py-3 active:bg-soft">
+                  <Avatar name={p.display_name} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium">{p.display_name}</div>
+                    {p.managed_by === user.id && <div className="text-sm text-muted">Managed by you</div>}
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><path d="M9 6l6 6-6 6" /></svg>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <TabBar active="family" />
+    </main>
+  );
+}
