@@ -18,7 +18,7 @@ and structured so a thin Expo app-store shell can wrap it later.
 - **Items:** name, a free-form details box (size, color, notes), optional photo, optional link. Pasting a link fills in the name and picture.
 - **Sign-in:** email + 6-digit code. No passwords.
 
-The privacy rules are enforced **in the database** (Postgres row-level security), not just hidden in the UI — see `supabase/migrations/0001_init.sql` and the tests in `supabase/tests/`.
+The privacy rules are enforced **in the database** (Postgres row-level security), not just hidden in the UI — see `supabase/migrations/0001_init.sql` and the tests in `tests/db/`.
 
 ## Costs
 
@@ -31,8 +31,8 @@ Everything below runs on free tiers for a family-sized app: **Vercel Hobby**, **
 ### 1. Supabase (database, sign-in, photos)
 
 1. Create a free account at [supabase.com](https://supabase.com) → **New project**. Pick a region near you (e.g. *Central US*). Save the database password somewhere safe.
-2. **SQL Editor → New query** → paste all of `supabase/migrations/0001_init.sql` → **Run**.
-3. New query → paste `supabase/migrations/0002_storage.sql` → **Run**.
+2. Create the database. **Either** (recommended) **Project Settings → Integrations → GitHub** → connect this repo with **Deploy to production** on, production branch `main`, Supabase directory `.` — every push to `main` then applies new files in `supabase/migrations/` automatically (watch the Supabase check on the commit in GitHub). **Or** by hand: **SQL Editor → New query** → paste `supabase/migrations/0001_init.sql` → **Run**, then the same for `0002_storage.sql`. Don't do both — hand-run SQL isn't recorded, so the integration would try to run it again.
+3. Check: **Table Editor** lists six tables and **Storage** has an `item-photos` bucket.
 4. **Authentication → Sign In / Providers → Email**: make sure Email is enabled. Leave "Confirm email" on.
 5. **Authentication → Email Templates**: edit **both** "Confirm signup" and "Magic Link" so they send a code instead of a link. Subject: `Your Gift Lists code`, body:
    ```html
@@ -69,6 +69,10 @@ Sign in, pick your name, then **Family → + Add** to pair by email or share you
 
 ---
 
+## Database changes
+
+Schema changes are new numbered files in `supabase/migrations/` (`0003_….sql`, …), applied in order by the Supabase GitHub integration when pushed to `main`. **Never edit a migration that has already been applied** — add a new one instead. Keep them safe to apply to a database that already has family data in it.
+
 ## Day-to-day admin (no code)
 
 - **See or fix data:** Supabase → **Table Editor** (`people`, `items`, `claims`, `connections`). Note: the table editor shows everything, including claims and suggestions — avoid peeking at your own list there!
@@ -100,15 +104,15 @@ Requires a local Postgres 15+:
 
 ```bash
 createdb gifttest
-psql -d gifttest -f supabase/tests/supabase_stub.sql -f supabase/migrations/0001_init.sql
-psql -d gifttest -f supabase/tests/privacy_test.sql   # ends with "ALL PRIVACY TESTS PASSED"
+psql -d gifttest -f tests/db/supabase_stub.sql -f supabase/migrations/0001_init.sql
+psql -d gifttest -f tests/db/privacy_test.sql   # ends with "ALL PRIVACY TESTS PASSED"
 ```
 
 ## Structure
 
 ```
 supabase/migrations/   database schema, privacy rules (RLS), RPCs, storage bucket
-supabase/tests/        privacy test suite
+tests/db/              privacy test suite (local Postgres only)
 src/app/               pages (App Router) + server actions (actions.ts)
 src/app/api/unfurl     link → name/picture lookup (SSRF-safe)
 src/app/api/keepalive  daily ping so free Supabase never pauses
