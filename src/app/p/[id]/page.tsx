@@ -4,6 +4,7 @@ import { requireMe } from "@/lib/supabase/server";
 import { ITEM_SELECT, normalizeItems } from "@/lib/items";
 import { Empty, Header } from "@/components/Header";
 import { ItemCard } from "@/components/ItemCard";
+import { AddItemSheet } from "@/components/AddItemSheet";
 import type { Item, Person } from "@/lib/types";
 
 type Tab = "list" | "ideas";
@@ -53,6 +54,21 @@ export default async function PersonPage({ params, searchParams }: {
     />
   );
 
+  const sheet = (kind: "wish" | "suggestion" | "idea", label: string, className: string) => (
+    <AddItemSheet
+      label={label}
+      className={className}
+      title={{ wish: `Add to ${first}'s wishlist`, suggestion: `Suggest for ${first}`, idea: `Idea for ${first}` }[kind]}
+      personId={id}
+      kind={kind}
+      userId={user.id}
+      notesPlaceholder={kind === "wish" ? "Size, color, model, anything that helps" : `Size, color, why ${first} would love it`}
+      note={kind === "suggestion" ? { text: `Everyone except ${first} will see this suggestion.`, tone: "warn" }
+        : kind === "idea" ? { text: "Only you will see this idea.", tone: "soft" } : undefined}
+    />
+  );
+  const linkBtn = "-mr-2 rounded-lg px-2 py-1 text-[15px] font-semibold text-accent active:bg-soft";
+
   const tabs: { key: Tab; label: string }[] = [
     { key: "list", label: "Wishlist" },
     { key: "ideas", label: "My ideas" },
@@ -83,7 +99,7 @@ export default async function PersonPage({ params, searchParams }: {
               title={`${first}'s wishlist`}
               count={wishes.length}
               note={isManager ? `You manage ${first}'s list, so you can add to it and shop for it.` : `Mark something bought so nobody doubles up.`}
-              add={isManager ? { href: `/p/${id}/new?kind=wish`, label: "+ Add" } : undefined}
+              add={isManager ? sheet("wish", "+ Add", linkBtn) : undefined}
             />
             {wishes.length === 0 ? <Empty>{first} hasn&apos;t added anything yet.</Empty> : wishes.map(card)}
           </section>
@@ -93,7 +109,7 @@ export default async function PersonPage({ params, searchParams }: {
               title="Suggestions"
               count={suggestions.length}
               note={`Ideas from family. ${first} can't see these.`}
-              add={{ href: `/p/${id}/new?kind=suggestion`, label: "+ Suggest" }}
+              add={sheet("suggestion", "+ Suggest", linkBtn)}
             />
             {suggestions.length === 0 ? <Empty>No suggestions yet. Know something {first} would like?</Empty> : suggestions.map(card)}
           </section>
@@ -101,7 +117,7 @@ export default async function PersonPage({ params, searchParams }: {
       ) : (
         <div className="space-y-3 px-4 pt-4">
           <p className="px-1 text-[14px] text-muted">Only you can see these.</p>
-          <Link href={`/p/${id}/new?kind=idea`} className="btn-primary w-full">+ Add a private idea</Link>
+          {sheet("idea", "+ Add a private idea", "btn-primary w-full")}
           {ideas.length === 0 ? <Empty>Jot down gift ideas here. They stay private to you.</Empty> : ideas.map(card)}
         </div>
       )}
@@ -109,14 +125,14 @@ export default async function PersonPage({ params, searchParams }: {
   );
 }
 
-function SectionHead({ title, count, note, add }: { title: string; count: number; note: string; add?: { href: string; label: string } }) {
+function SectionHead({ title, count, note, add }: { title: string; count: number; note: string; add?: React.ReactNode }) {
   return (
     <div className="px-1">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-[17px] font-bold">
           {title} <span className="font-semibold text-muted">· {count}</span>
         </h2>
-        {add && <Link href={add.href} className="-mr-2 rounded-lg px-2 py-1 text-[15px] font-semibold text-accent active:bg-soft">{add.label}</Link>}
+        {add}
       </div>
       <p className="text-[14px] text-muted">{note}</p>
     </div>

@@ -4,6 +4,7 @@ import { requireMe } from "@/lib/supabase/server";
 import { ITEM_SELECT, normalizeItems } from "@/lib/items";
 import { Empty, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
 import { ItemCard } from "@/components/ItemCard";
+import { AddItemSheet } from "@/components/AddItemSheet";
 
 /** Home = my own wishlist. Bought status is never shown here (and the database hides it anyway). */
 export default async function Home() {
@@ -24,7 +25,10 @@ export default async function Home() {
 
       <div className="space-y-3 px-4 pt-1">
         <p className="px-1 text-[14px] text-muted">Family can see this list. You&apos;ll never see what&apos;s been bought — no spoilers.</p>
-        <Link href={`/p/${me.id}/new?kind=wish`} className="btn-primary w-full">+ Add to wishlist</Link>
+        <AddItemSheet
+          label="+ Add to wishlist" className="btn-primary w-full" title="Add to my wishlist"
+          personId={me.id} kind="wish" userId={user.id} notesPlaceholder="Size, color, model, anything that helps"
+        />
 
         {items.length === 0 ? (
           <Empty>Your wishlist is empty. Add a few things you&apos;d love.</Empty>

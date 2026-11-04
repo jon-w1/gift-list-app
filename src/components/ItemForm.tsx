@@ -8,11 +8,13 @@ import { saveItem, type ItemInput } from "@/app/actions";
 
 const looksLikeUrl = (s: string) => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(s.trim());
 
-export function ItemForm({ initial, userId, backHref, notesPlaceholder }: {
+export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }: {
   initial: ItemInput;
   userId: string;
   backHref: string;
   notesPlaceholder: string;
+  /** When set (e.g. inside a sheet), called on save/cancel instead of navigating to backHref. */
+  onDone?: () => void;
 }) {
   const router = useRouter();
   const [v, setV] = useState<ItemInput>(initial);
@@ -79,7 +81,8 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder }: {
       setError(res.error);
       return;
     }
-    router.replace(backHref);
+    if (onDone) onDone();
+    else router.replace(backHref);
     router.refresh();
   }
 
@@ -140,8 +143,10 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder }: {
 
       {error && <p className="text-sm text-accent">{error}</p>}
 
-      <div className="flex gap-3 pt-1">
-        <button type="button" className="btn-secondary flex-1" onClick={() => router.replace(backHref)}>Cancel</button>
+      <div className={onDone
+        ? "sticky bottom-0 -mx-4 flex gap-3 border-t border-line bg-bg px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"
+        : "flex gap-3 pt-1"}>
+        <button type="button" className="btn-secondary flex-1" onClick={() => (onDone ? onDone() : router.replace(backHref))}>Cancel</button>
         <button type="submit" className="btn-primary flex-[2]" disabled={saving || uploading}>
           {saving ? "Saving…" : initial.id ? "Save" : "Add"}
         </button>
