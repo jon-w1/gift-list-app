@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { PHOTO_BUCKET } from "@/lib/photos";
 import type { ItemKind } from "@/lib/types";
 
@@ -68,21 +70,44 @@ export async function deleteManagedPerson(formData: FormData) {
 
 // ───────────────────────────── pairing
 
-export type PairResult = { status: "connected" | "pending" | "self" | "invalid" | "error"; name?: string; person_id?: string; email?: string } | null;
+export type PairResult = {
+  status: "connected" | "invited" | "pending" | "self" | "invalid" | "error";
+  name?: string;
+  person_id?: string;
+  email?: string;
+  invite_url?: string;
+} | null;
 
+/**
+ * Find or invite by email. If they have an account you're paired instantly.
+ * If not, the pairing is saved and we email them your invite link. Sending
+ * creates their (not yet signed-in) account, which turns the saved pairing
+ * into a real one straight away.
+ */
 export async function connectByEmail(_prev: PairResult, formData: FormData): Promise<PairResult> {
-  const { supabase } = await uid();
-  const email = str(formData.get("email"), 320) ?? "";
+  const { supabase, userId } = await uid();
+  const email = (str(formData.get("email"), 320) ?? "").toLowerCase();
   const { data, error } = await supabase.rpc("connect_by_email", { target_email: email });
   if (error) return { status: "error", email };
+  const res = { ...(data as NonNullable<PairResult>), email };
   revalidatePath("/", "layout");
-  return { ...(data as NonNullable<PairResult>), email };
-}
+  if (res.status !== "pending") return res;
 
-export async function getInviteToken() {
-  const { supabase } = await uid();
-  const { data } = await supabase.rpc("my_invite_token");
-  return data as string | null;
+  const [{ data: token }, { data: me }] = await Promise.all([
+    supabase.rpc("my_invite_token"),
+    supabase.from("people").select("display_name").eq("user_id", userId).single(),
+  ]);
+  const h = await headers();
+  const invite_url = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}/invite/${token}`;
+
+  const admin = createAdminClient();
+  if (!admin) return { ...res, invite_url };
+  const { error: sendError } = await admin.auth.admin.inviteUserByEmail(email, {
+    data: { inviter_name: me?.display_name ?? "Your family", invite_url },
+  });
+  if (sendError) return { ...res, invite_url };
+  revalidatePath("/", "layout");
+  return { ...res, status: "invited" };
 }
 
 export async function acceptInvite(formData: FormData) {

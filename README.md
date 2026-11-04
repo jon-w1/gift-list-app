@@ -14,7 +14,7 @@ and structured so a thin Expo app-store shell can wrap it later.
 
 - **Bought:** "Mark bought" on any wishlist item, suggestion or private idea. Everyone except the recipient sees who bought it, so nobody doubles up.
 - **Layout:** home is your own wishlist; the **Family** tab lists everyone you're paired with. A person's page shows their wishlist with family suggestions stacked underneath, plus a **My ideas** tab.
-- **Pairing:** look someone up by email (instant; if they don't have an account yet, you're paired automatically when they sign up), or share your invite link.
+- **Pairing:** **Find or invite by email.** If they have an account you're paired instantly; if not, they're emailed an invite link and you're paired straight away.
 - **People without accounts:** add kids/grandparents you manage. Everyone paired with you can see and shop their lists.
 - **Items:** name, a free-form details box (size, color, notes), optional photo, optional link. Pasting a link fills in the name and picture.
 - **Sign-in:** email + 6-digit code. No passwords.
@@ -58,6 +58,14 @@ Supabase's built-in email only delivers to your own team's addresses, and its de
    <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
    <p>Enter this code in Gift Lists to sign in. It expires in an hour.</p>
    ```
+**Invite email.** Also edit the **Invite user** template (used when someone adds a family member who has no account yet). Subject: `{{ .Data.inviter_name }} invited you to Gift Lists`, body:
+   ```html
+   <h2>{{ .Data.inviter_name }} invited you to Gift Lists</h2>
+   <p>Our family's wishlists and gift ideas, without spoiling surprises.</p>
+   <p><a href="{{ .Data.invite_url }}">Open Gift Lists</a></p>
+   <p>Sign in with this email address. You'll get a 6-digit code, no password needed.</p>
+   ```
+
 If emails still arrive with a "Sign in" link instead of a code, Supabase isn't using the saved template yet — change the subject (e.g. add "TEST"), save again, send a new code, then set it back. The app has no page for those links, so tapping them just returns to the login screen.
 
 ### 3. Vercel (hosting)
@@ -66,13 +74,14 @@ If emails still arrive with a "Sign in" link instead of a code, Supabase isn't u
 2. Under **Settings → Environment Variables** add (all environments):
    - `NEXT_PUBLIC_SUPABASE_URL` = Supabase Project URL
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = Supabase publishable (or anon) key
+   - `SUPABASE_SERVICE_ROLE_KEY` = Supabase **secret** (service_role) key, used only on the server to email invites. Optional: without it, inviting by email still saves the pairing and offers a shareable invite link instead. Never give it a `NEXT_PUBLIC_` prefix.
 3. **Deploy** (or **Redeploy** after changing variables). Every change pushed to GitHub redeploys automatically.
 4. Back in Supabase → **Authentication → URL Configuration**: set **Site URL** to the Vercel address (e.g. `https://gift-list-app-9oiq.vercel.app`).
 5. Optional: **Settings → Domains** to rename the address or use your own domain (then update the Supabase Site URL).
 
 ### 4. Invite the family
 
-Sign in, pick your name, then **Family → + Add** to pair by email or share your invite link. Each person can tap **Add Gift Lists to your home screen** for app-like install instructions.
+Sign in, pick your name, then **Family → + Add** to find or invite people by email. Each person can tap **Add Gift Lists to your home screen** for app-like install instructions.
 
 ---
 
