@@ -22,7 +22,7 @@ The privacy rules are enforced **in the database** (Postgres row-level security)
 
 ## Costs
 
-Everything below runs on free tiers for a family-sized app: **Vercel Hobby**, **Supabase Free**, **Resend Free** (3,000 emails/month). A daily keep-alive (`vercel.json` → `/api/keepalive`) stops Supabase from pausing the project between holidays.
+Everything below runs on free tiers for a family-sized app: **Vercel Hobby**, **Supabase Free**, Gmail as the sender (about 500 emails/day). A daily keep-alive (`vercel.json` → `/api/keepalive`) stops Supabase from pausing the project between holidays.
 
 ---
 
@@ -33,35 +33,41 @@ Everything below runs on free tiers for a family-sized app: **Vercel Hobby**, **
 1. Create a free account at [supabase.com](https://supabase.com) → **New project**. Pick a region near you (e.g. *Central US*). Save the database password somewhere safe.
 2. Create the database. **Either** (recommended) **Project Settings → Integrations → GitHub** → connect this repo with **Deploy to production** on, production branch `main`, Supabase directory `.` — every push to `main` then applies new files in `supabase/migrations/` automatically (watch the Supabase check on the commit in GitHub). **Or** by hand: **SQL Editor → New query** → paste `supabase/migrations/0001_init.sql` → **Run**, then the same for `0002_storage.sql`. Don't do both — hand-run SQL isn't recorded, so the integration would try to run it again.
 3. Check: **Table Editor** lists six tables and **Storage** has an `item-photos` bucket.
-4. **Authentication → Sign In / Providers → Email**: make sure Email is enabled. Leave "Confirm email" on.
-5. **Authentication → Email Templates**: edit **both** "Confirm signup" and "Magic Link" so they send a code instead of a link. Subject: `Your Gift Lists code`, body:
+4. **Authentication → Sign In / Providers → Email**: make sure Email is enabled and set **Email OTP length** to `6`.
+5. **Project Settings → API Keys** (or the **Connect** button): copy the **Project URL** and the **publishable** key (or the legacy **anon** key) for Vercel. Never use the secret / service_role key.
+
+Email templates and the Site URL come later: templates can only be edited once custom SMTP (step 2) is on, and the Site URL needs the Vercel address (step 3).
+
+### 2. Email sender (sends the sign-in codes)
+
+Supabase's built-in email only delivers to your own team's addresses, and its default emails contain a link, not a code — so the app needs custom SMTP plus edited templates before anyone can sign in.
+
+**Gmail (free, no domain needed — what we use):**
+1. Create a Gmail account for the app (e.g. `giftlistapp26@gmail.com`), turn on **2-Step Verification**, then create an **App password** at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+2. Supabase → **Authentication → Emails → Set up SMTP** → enable custom SMTP:
+   - Host `smtp.gmail.com`, Port `465`, Username = the Gmail address, Password = the app password
+   - Sender email = the same Gmail address, Sender name `Gift Lists`
+3. **Authentication → Rate Limits**: raise "emails sent per hour" to about 30.
+
+*Alternative if you own a domain:* [Resend](https://resend.com) — verify the domain, create an API key, and use Host `smtp.resend.com`, Port `465`, Username `resend`, Password = API key, Sender `gifts@yourdomain.com`. Switching sender later is only a Supabase SMTP settings change.
+
+**Then edit the templates.** **Authentication → Emails → Templates**: edit **both** "Confirm sign up" and "Magic link or OTP" (paste into the **Source** tab, then **Save changes**). Subject: `Your Gift Lists code`, body:
    ```html
    <h2>Your Gift Lists code</h2>
    <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
    <p>Enter this code in Gift Lists to sign in. It expires in an hour.</p>
    ```
-6. **Authentication → URL Configuration**: set **Site URL** to your Vercel address (after step 3), e.g. `https://gift-lists.vercel.app`.
-7. **Project Settings → API**: copy the **Project URL** and the **anon / public** key for step 3.
-
-### 2. Resend (sends the sign-in codes)
-
-Supabase's built-in email only delivers to your own team's addresses, so family needs a real sender.
-
-1. Create a free account at [resend.com](https://resend.com). Add and verify a domain you own (a few DNS records), or use a subdomain like `mail.yourdomain.com`.
-2. **API Keys → Create** (sending access).
-3. In Supabase: **Authentication → Emails → SMTP Settings → Enable custom SMTP**:
-   - Host `smtp.resend.com`, Port `465`, Username `resend`, Password = your Resend API key
-   - Sender email `gifts@yourdomain.com`, Sender name `Gift Lists`
-4. **Authentication → Rate Limits**: raise "emails sent per hour" to something like 30.
+If emails still arrive with a "Sign in" link instead of a code, Supabase isn't using the saved template yet — change the subject (e.g. add "TEST"), save again, send a new code, then set it back. The app has no page for those links, so tapping them just returns to the login screen.
 
 ### 3. Vercel (hosting)
 
-1. Sign in at [vercel.com](https://vercel.com) with GitHub → **Add New → Project** → import this repo.
-2. Under **Environment Variables** add:
+1. Sign in at [vercel.com](https://vercel.com) with GitHub → **Add New → Project** → import this repo. **Skip** the "Supabase — Add" integration card: it creates a *new* Supabase project instead of using yours.
+2. Under **Settings → Environment Variables** add (all environments):
    - `NEXT_PUBLIC_SUPABASE_URL` = Supabase Project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = Supabase anon key
-3. **Deploy.** Every change pushed to GitHub redeploys automatically.
-4. Optional: **Settings → Domains** to use your own domain (then update the Supabase Site URL).
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = Supabase publishable (or anon) key
+3. **Deploy** (or **Redeploy** after changing variables). Every change pushed to GitHub redeploys automatically.
+4. Back in Supabase → **Authentication → URL Configuration**: set **Site URL** to the Vercel address (e.g. `https://gift-list-app-9oiq.vercel.app`).
+5. Optional: **Settings → Domains** to rename the address or use your own domain (then update the Supabase Site URL).
 
 ### 4. Invite the family
 
@@ -76,7 +82,7 @@ Schema changes are new numbered files in `supabase/migrations/` (`0003_….sql`,
 ## Day-to-day admin (no code)
 
 - **See or fix data:** Supabase → **Table Editor** (`people`, `items`, `claims`, `connections`). Note: the table editor shows everything, including claims and suggestions — avoid peeking at your own list there!
-- **Sign-in problems:** Supabase → **Authentication → Users** (and Resend → **Logs** for email delivery).
+- **Sign-in problems:** Supabase → **Authentication → Users** and **Authentication → Logs** for email delivery (the sending Gmail account's Sent folder shows every code email).
 - **Changes to the app:** ask Claude to make them; they're pushed to GitHub and Vercel redeploys.
 
 ## Future app-store shell (optional)
