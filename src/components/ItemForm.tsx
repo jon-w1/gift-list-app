@@ -40,6 +40,7 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder }: {
         ...cur,
         url: data.url ?? cur.url,
         name: cur.name?.trim() ? cur.name : data.name ?? "",
+        notes: cur.notes?.trim() ? cur.notes : data.details ?? cur.notes,
         image_url: cur.photo_path ? cur.image_url : data.image_url ?? cur.image_url,
       }));
       setLinkNote(data.name ? null : "Couldn't read that page — just type the name.");

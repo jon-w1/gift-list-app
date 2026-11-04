@@ -2,10 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { createClient } from "@/lib/supabase/server";
-import { nameFromUrl, parseHtml, type Unfurled } from "@/lib/unfurl/parse";
+import { nameFromUrl, parseHtml, tidyName, type Unfurled } from "@/lib/unfurl/parse";
 
 /**
- * GET /api/unfurl?url=…  → { name, image_url, price, url }
+ * GET /api/unfurl?url=…  → { name, image_url, price, url, details }
  * Used by the "paste a link" box today, and by the future share-sheet extension.
  */
 export const runtime = "nodejs";
@@ -93,6 +93,10 @@ export async function GET(req: NextRequest) {
   // Stores that block bots (e.g. Amazon) return a captcha page titled "Amazon.com" etc.
   const looksBlocked = !result.name || /^(amazon(\.com)?|robot check|access denied|just a moment\.*)$/i.test(result.name);
   if (looksBlocked) result.name = nameFromUrl(result.url) ?? nameFromUrl(target.toString());
+
+  const tidy = tidyName(result.name, result.url, result.site_name);
+  result = { ...result, name: tidy.name, details: tidy.details };
+  delete result.site_name;
 
   return NextResponse.json(result, { headers: { "cache-control": "private, max-age=3600" } });
 }

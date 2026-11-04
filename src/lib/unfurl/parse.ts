@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-export type Unfurled = { name: string | null; image_url: string | null; price: string | null; url: string };
+export type Unfurled = { name: string | null; image_url: string | null; price: string | null; url: string; details?: string | null; site_name?: string | null };
 
 const clean = (s: string | null | undefined, max = 200) => {
   const t = (s ?? "").replace(/\s+/g, " ").trim();
@@ -75,7 +75,49 @@ export function parseHtml(html: string, pageUrl: string): Unfurled {
     formatPrice(offer?.price ?? offer?.lowPrice, offer?.priceCurrency) ??
     formatPrice(meta("product:price:amount", "og:price:amount"), meta("product:price:currency", "og:price:currency"));
 
-  return { name, image_url, price, url: pageUrl };
+  return { name, image_url, price, url: pageUrl, site_name: meta("og:site_name") };
+}
+
+const SITE_DOMAIN = /\b[a-z0-9-]+\.(com|net|org|co|co\.uk|ca|de|fr|es|it|com\.au|shop|store|us)\b/i;
+const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+/**
+ * Turn a store's page title into a readable item name.
+ * "Amazon.com | BENPAO Men's Sneakers(Dark Grey,US12) | Low Top Business,… | Fashion Sneakers"
+ *   → name "BENPAO Men's Sneakers", details "Dark Grey, US12"
+ */
+export function tidyName(raw: string | null | undefined, pageUrl?: string, siteName?: string | null): { name: string | null; details: string | null } {
+  const text = clean(raw, 1000);
+  if (!text) return { name: null, details: null };
+  let brand = "";
+  try { brand = new URL(pageUrl ?? "").hostname.replace(/^www\./, "").split(".")[0]; } catch { /* no url */ }
+  const isSite = (seg: string) => {
+    const k = squash(seg);
+    return !k || SITE_DOMAIN.test(seg) || (!!brand && k === squash(brand)) || (!!siteName && k === squash(siteName));
+  };
+
+  // Split on "|" and " : " (and "Amazon.com:"); keep the first part that isn't the store's name.
+  const parts = text.split(/\s*\|\s*|\s+:\s+|(?<=\.[a-z]{2,4}):\s*/i).map((p) => p.trim()).filter(Boolean);
+  let name = parts.find((p) => !isSite(p)) ?? text;
+  // " - Walmart.com" style suffixes: drop dash-separated pieces only when they're the store's name.
+  const dashed = name.split(/\s+[-–—]\s+/);
+  if (dashed.length > 1 && dashed.some(isSite)) name = dashed.filter((p) => !isSite(p)).join(" - ");
+
+  // Variant info in brackets goes to details: "(Dark Grey,US12)" → "Dark Grey, US12".
+  const details: string[] = [];
+  name = name.replace(/\s*[([]([^)\]]{1,80})[)\]]/g, (_, inner: string) => {
+    details.push(inner.replace(/\s*,\s*/g, ", ").trim());
+    return " ";
+  }).replace(/\s+/g, " ").trim();
+
+  // Still long? Cut at a comma, else at a word boundary.
+  const MAX = 70;
+  if (name.length > MAX) {
+    const comma = name.indexOf(",");
+    name = comma >= 15 && comma <= MAX ? name.slice(0, comma) : name.slice(0, name.lastIndexOf(" ", MAX) > 20 ? name.lastIndexOf(" ", MAX) : MAX);
+  }
+  name = name.replace(/[\s,;:–—-]+$/, "").trim();
+  return { name: name || clean(text, MAX), details: details.filter(Boolean).join("; ") || null };
 }
 
 /** Fallback when a store blocks us: guess a name from the URL (works well for Amazon). */
