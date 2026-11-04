@@ -71,7 +71,7 @@ export default async function PersonPage({ params, searchParams }: {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "list", label: "Wishlist" },
-    { key: "ideas", label: "My ideas" },
+    { key: "ideas", label: `Your notepad for ${first}` },
   ];
 
   return (
@@ -84,7 +84,7 @@ export default async function PersonPage({ params, searchParams }: {
             key={t.key}
             href={t.key === "list" ? `/p/${id}` : `/p/${id}?tab=${t.key}`}
             replace
-            className={`flex-1 rounded-xl py-2 text-center text-[14px] font-semibold ${tab === t.key ? "bg-ink text-bg" : "text-muted active:bg-soft"}`}
+            className={`flex flex-1 items-center justify-center rounded-xl px-2 py-2 text-center text-[14px] leading-tight font-semibold ${tab === t.key ? "bg-ink text-bg" : "text-muted active:bg-soft"}`}
             aria-current={tab === t.key ? "page" : undefined}
           >
             {t.label}
