@@ -349,3 +349,15 @@ grant execute on function public.delete_my_account(), public.connect_by_email(te
   public.accept_invite(uuid), public.my_invite_token(), public.remove_connection(uuid)
   to authenticated;
 grant execute on function public.invite_preview(uuid), public.ping() to anon, authenticated;
+
+-- Explicit table/helper grants, so the app works even if the project has
+-- "automatically expose new tables" turned off. Row-level security above
+-- still decides which rows each person can see or change.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on public.people, public.connections,
+  public.pending_connections, public.invites, public.items, public.claims
+  to authenticated;
+grant execute on function public.person_owner(uuid), public.are_connected(uuid, uuid),
+  public.can_view_person(uuid), public.can_manage_person(uuid),
+  public.is_recipient(uuid), public.can_see_claims(uuid)
+  to authenticated;
