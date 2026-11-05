@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Gift Lists", template: "%s · Gift Lists" },
+  title: { default: "Gift List App", template: "%s · Gift List App" },
   description: "Wishlists, gift ideas and suggestions for family & friends — without spoiling the surprise.",
   applicationName: "Gift Lists",
   appleWebApp: { capable: true, title: "Gift Lists", statusBarStyle: "default" },
