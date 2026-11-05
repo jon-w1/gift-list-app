@@ -23,7 +23,7 @@ export default async function Welcome({ searchParams }: { searchParams: Promise<
         <div className="pt-2">
           <label className="label" htmlFor="birthday">Birthday <span className="font-normal">(optional)</span></label>
           <input id="birthday" name="birthday" type="date" className="input" max={today()} defaultValue={me.birthday ?? ""} />
-          <p className="mt-1.5 px-1 text-sm text-muted">People you&apos;re paired with see the date, not your age.</p>
+          <p className="mt-1.5 px-1 text-sm text-muted">People you&apos;re paired with see month &amp; day only.</p>
         </div>
         <SubmitButton className="btn-primary w-full">Continue</SubmitButton>
       </form>

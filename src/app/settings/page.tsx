@@ -37,7 +37,7 @@ export default async function Settings() {
               <input id="me-name" name="display_name" required maxLength={60} defaultValue={me.display_name} className="input" />
             </div>
             <div>
-              <label className="label" htmlFor="me-birthday">Birthday <span className="font-normal">(optional, people you&apos;re paired with see the date)</span></label>
+              <label className="label" htmlFor="me-birthday">Birthday <span className="font-normal">(optional, people you&apos;re paired with see month &amp; day only)</span></label>
               <input id="me-birthday" name="birthday" type="date" max={today()} defaultValue={me.birthday ?? ""} className="input" />
             </div>
             <SubmitButton className="btn-secondary w-full">Save</SubmitButton>
