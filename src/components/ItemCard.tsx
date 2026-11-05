@@ -36,7 +36,7 @@ export function ItemCard({ item, userId, canEdit, showClaims, showCreator }: {
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">
-            <h3 className="min-w-0 flex-1 text-[16px] leading-snug font-semibold break-words">{item.name}</h3>
+            <h3 className="line-clamp-2 min-w-0 flex-1 text-[16px] leading-snug font-semibold break-words" title={item.name}>{item.name}</h3>
             {canEdit && (
               <ItemSheet
                 className="-mt-1 -mr-1 shrink-0 rounded-lg px-2 py-1 text-sm font-medium text-muted active:bg-soft"
