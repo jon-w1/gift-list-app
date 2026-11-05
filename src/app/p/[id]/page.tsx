@@ -7,7 +7,7 @@ import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
 import { SubmitButton } from "@/components/SubmitButton";
 import { addManager, removeManager, removePerson } from "@/app/actions";
-import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { Item, Person } from "@/lib/types";
 
 type Tab = "list" | "ideas";
@@ -125,19 +125,18 @@ export default async function PersonPage({ params, searchParams }: {
           {isManaged && isManager && <Managers personId={id} first={first} managerIds={managerIds} userId={user.id} />}
 
           {(!isManaged || isManager) && (
-            <form action={removePerson} className="space-y-1.5 border-t border-line pt-5 pb-4">
+            <form action={removePerson} className="border-t border-line pt-5 pb-4">
               <input type="hidden" name="person_id" value={id} />
-              <ConfirmSubmit
+              <ConfirmDialog
                 className="btn-danger w-full"
                 label="Remove person"
-                confirmLabel={isManaged ? `Tap again to delete ${first}'s profile` : `Tap again to unpair from ${first}`}
+                title={isManaged ? `Delete ${first}'s profile?` : `Remove ${first}?`}
+                message={isManaged
+                  ? `This deletes ${first}'s profile and wishlist for every manager. It can't be undone.`
+                  : `You'll be unpaired and stop seeing each other's lists. Nothing is deleted, and you can pair again any time.`}
+                confirmLabel={isManaged ? "Delete" : "Remove"}
                 pendingLabel="Removing…"
               />
-              <p className="px-1 text-center text-[13px] text-muted">
-                {isManaged
-                  ? `Deletes ${first}'s profile and wishlist for every manager.`
-                  : `Unpairs you. You'll stop seeing each other's lists; nothing is deleted.`}
-              </p>
             </form>
           )}
         </div>
