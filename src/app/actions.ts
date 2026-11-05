@@ -60,6 +60,44 @@ export async function addManagedPerson(formData: FormData) {
   if (data) redirect(`/p/${data.id}`);
 }
 
+/**
+ * "Remove person" from their page: unpair from a real account, or delete a
+ * managed profile (any manager can). Then back to Family & Friends.
+ */
+export async function removePerson(formData: FormData) {
+  const { supabase, userId } = await uid();
+  const id = str(formData.get("person_id"), 64);
+  if (!id) return;
+  const { data: person } = await supabase.from("people").select("id, user_id").eq("id", id).maybeSingle();
+  if (person?.user_id && person.user_id !== userId) {
+    await supabase.rpc("remove_connection", { other_user: person.user_id });
+  } else if (person && !person.user_id) {
+    await supabase.from("people").delete().eq("id", id); // RLS: managers only
+  }
+  revalidatePath("/", "layout");
+  redirect("/family");
+}
+
+/** Any manager can add someone they're paired with as a co-manager. */
+export async function addManager(formData: FormData) {
+  const { supabase } = await uid();
+  const personId = str(formData.get("person_id"), 64);
+  const userId = str(formData.get("user_id"), 64);
+  if (!personId || !userId) return;
+  await supabase.from("person_managers").insert({ person_id: personId, user_id: userId });
+  revalidatePath("/", "layout");
+}
+
+/** Any manager can remove any manager (the database refuses to remove the last one). */
+export async function removeManager(formData: FormData) {
+  const { supabase } = await uid();
+  const personId = str(formData.get("person_id"), 64);
+  const userId = str(formData.get("user_id"), 64);
+  if (!personId || !userId) return;
+  await supabase.from("person_managers").delete().eq("person_id", personId).eq("user_id", userId);
+  revalidatePath("/", "layout");
+}
+
 export async function deleteManagedPerson(formData: FormData) {
   const { supabase } = await uid();
   const id = str(formData.get("id"), 64);

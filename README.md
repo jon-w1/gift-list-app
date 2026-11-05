@@ -15,7 +15,7 @@ and structured so a thin Expo app-store shell can wrap it later.
 - **Bought:** "Mark bought" on any wishlist item, suggestion or private idea. Everyone except the recipient sees who bought it, so nobody doubles up.
 - **Layout:** home is your own wishlist; the **Family & Friends** tab lists everyone you're paired with. A person's page shows their wishlist with family suggestions stacked underneath, plus a private **Your notepad for <name>** tab.
 - **Pairing:** **Find or invite by email.** If they have an account you're paired instantly; if not, they're emailed an invite link and you're paired straight away.
-- **People without accounts:** add kids/grandparents you manage. Everyone paired with you can see and shop their lists.
+- **People without accounts:** add kids/grandparents you manage (**Add a child or other profile**). A profile can have several **managers** (e.g. both parents): any manager can edit the wishlist and add or remove other managers (never the last one). Everyone paired with *any* manager can see and shop the list.
 - **Items:** name, a free-form details box (size, color, notes), optional photo, optional link. Pasting a link fills in the name and picture.
 - **Sign-in:** email + 6-digit code. No passwords.
 
@@ -120,9 +120,11 @@ Requires a local Postgres 15+:
 
 ```bash
 createdb gifttest
-psql -d gifttest -f tests/db/supabase_stub.sql -f supabase/migrations/0001_init.sql
-psql -d gifttest -f tests/db/privacy_test.sql   # ends with "ALL PRIVACY TESTS PASSED"
+psql -d gifttest -f tests/db/supabase_stub.sql -f supabase/migrations/0001_init.sql -f supabase/migrations/0003_single_bought_state.sql -f supabase/migrations/0004_co_managers.sql
+psql -d gifttest -f tests/db/privacy_test.sql -f tests/db/comanager_test.sql   # ends with "ALL CO-MANAGER TESTS PASSED"
 ```
+
+(`0002_storage.sql` needs Supabase's storage schema, so it isn't part of the local run.)
 
 ## Structure
 

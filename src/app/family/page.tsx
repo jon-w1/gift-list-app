@@ -10,9 +10,13 @@ export default async function Family() {
   const { supabase, user, me } = await requireMe();
   if (!me.onboarded) redirect("/welcome");
 
-  const { data: people } = await supabase.from("people").select("*").neq("id", me.id).order("display_name").returns<Person[]>();
-  const managed = (people ?? []).filter((p) => p.managed_by === user.id);
-  const others = (people ?? []).filter((p) => p.managed_by !== user.id);
+  const [{ data: people }, { data: mine }] = await Promise.all([
+    supabase.from("people").select("*").neq("id", me.id).order("display_name").returns<Person[]>(),
+    supabase.from("person_managers").select("person_id").eq("user_id", user.id),
+  ]);
+  const managedIds = new Set((mine ?? []).map((m) => m.person_id as string));
+  const managed = (people ?? []).filter((p) => managedIds.has(p.id));
+  const others = (people ?? []).filter((p) => !managedIds.has(p.id));
 
   return (
     <main className={TAB_PAGE}>
@@ -32,7 +36,7 @@ export default async function Family() {
                   <Avatar name={p.display_name} />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{p.display_name}</div>
-                    {p.managed_by === user.id && <div className="text-sm text-muted">Managed by you</div>}
+                    {managedIds.has(p.id) && <div className="text-sm text-muted">Managed by you</div>}
                     {p.user_id && !p.onboarded && <div className="truncate text-sm text-muted">Invited · {p.email}</div>}
                   </div>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted"><path d="M9 6l6 6-6 6" /></svg>

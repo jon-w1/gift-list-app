@@ -9,10 +9,14 @@ export const metadata = { title: "Settings" };
 
 export default async function Settings() {
   const { supabase, user, me } = await requireMe();
-  const [{ data: conns }, { data: managed }] = await Promise.all([
+  const [{ data: conns }, { data: mine }] = await Promise.all([
     supabase.from("connections").select("user_a, user_b"),
-    supabase.from("people").select("*").eq("managed_by", user.id).order("display_name").returns<Person[]>(),
+    supabase.from("person_managers").select("person_id").eq("user_id", user.id),
   ]);
+  const managedIds = (mine ?? []).map((m) => m.person_id as string);
+  const { data: managed } = managedIds.length
+    ? await supabase.from("people").select("*").in("id", managedIds).order("display_name").returns<Person[]>()
+    : { data: [] as Person[] };
   const otherIds = (conns ?? []).map((c) => (c.user_a === user.id ? c.user_b : c.user_a));
   const { data: paired } = otherIds.length
     ? await supabase.from("people").select("*").in("user_id", otherIds).order("display_name").returns<Person[]>()

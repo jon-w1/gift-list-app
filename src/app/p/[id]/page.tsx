@@ -5,6 +5,9 @@ import { ITEM_SELECT, normalizeItems } from "@/lib/items";
 import { Empty, Header } from "@/components/Header";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
+import { SubmitButton } from "@/components/SubmitButton";
+import { addManager, removeManager, removePerson } from "@/app/actions";
+import { ConfirmSubmit } from "@/components/ConfirmSubmit";
 import type { Item, Person } from "@/lib/types";
 
 type Tab = "list" | "ideas";
@@ -23,7 +26,13 @@ export default async function PersonPage({ params, searchParams }: {
   const { data: person } = await supabase.from("people").select("*").eq("id", id).maybeSingle<Person>();
   if (!person) notFound();
 
-  const isManager = person.managed_by === user.id;
+  // Managed profiles (kids etc.) can have several managers; anyone of them can edit.
+  const isManaged = !person.user_id;
+  const { data: managerRows } = isManaged
+    ? await supabase.from("person_managers").select("user_id").eq("person_id", id)
+    : { data: [] as { user_id: string }[] };
+  const managerIds = (managerRows ?? []).map((m) => m.user_id as string);
+  const isManager = managerIds.includes(user.id);
   const first = person.display_name.split(" ")[0];
   const tab: Tab = rawTab === "ideas" ? "ideas" : "list";
 
@@ -112,6 +121,25 @@ export default async function PersonPage({ params, searchParams }: {
             />
             {suggestions.length === 0 ? <Empty>No suggestions yet. Know something {first} would like?</Empty> : suggestions.map(card)}
           </section>
+
+          {isManaged && isManager && <Managers personId={id} first={first} managerIds={managerIds} userId={user.id} />}
+
+          {(!isManaged || isManager) && (
+            <form action={removePerson} className="space-y-1.5 border-t border-line pt-5 pb-4">
+              <input type="hidden" name="person_id" value={id} />
+              <ConfirmSubmit
+                className="btn-danger w-full"
+                label="Remove person"
+                confirmLabel={isManaged ? `Tap again to delete ${first}'s profile` : `Tap again to unpair from ${first}`}
+                pendingLabel="Removing…"
+              />
+              <p className="px-1 text-center text-[13px] text-muted">
+                {isManaged
+                  ? `Deletes ${first}'s profile and wishlist for every manager.`
+                  : `Unpairs you. You'll stop seeing each other's lists; nothing is deleted.`}
+              </p>
+            </form>
+          )}
         </div>
       ) : (
         <div className="space-y-3 px-4 pt-4">
@@ -135,5 +163,55 @@ function SectionHead({ title, count, note, add }: { title: string; count: number
       </div>
       <p className="text-[14px] text-muted">{note}</p>
     </div>
+  );
+}
+
+/** Managers of a kid/managed profile: list, remove (never the last), add from people you're paired with. */
+async function Managers({ personId, first, managerIds, userId }: { personId: string; first: string; managerIds: string[]; userId: string }) {
+  const { supabase } = await requireMe();
+  const { data: conns } = await supabase.from("connections").select("user_a, user_b");
+  const pairedIds = (conns ?? []).map((c) => (c.user_a === userId ? c.user_b : c.user_a));
+  const ids = [...new Set([...managerIds, ...pairedIds])];
+  const { data: people } = ids.length
+    ? await supabase.from("people").select("user_id, display_name").in("user_id", ids).returns<{ user_id: string; display_name: string }[]>()
+    : { data: [] as { user_id: string; display_name: string }[] };
+  const nameOf = (uid: string) => (uid === userId ? "You" : people?.find((p) => p.user_id === uid)?.display_name ?? "Someone");
+  const candidates = (people ?? []).filter((p) => pairedIds.includes(p.user_id) && !managerIds.includes(p.user_id))
+    .sort((a, b) => a.display_name.localeCompare(b.display_name));
+  const canRemove = managerIds.length > 1;
+
+  return (
+    <section className="space-y-3">
+      <div className="px-1">
+        <h2 className="text-[17px] font-bold">Managers <span className="font-semibold text-muted">· {managerIds.length}</span></h2>
+        <p className="text-[14px] text-muted">Managers can edit {first}&apos;s wishlist. Anyone paired with a manager can see and shop it.</p>
+      </div>
+      <ul className="card divide-y divide-line overflow-hidden">
+        {[...managerIds].sort((a, b) => (a === userId ? -1 : b === userId ? 1 : nameOf(a).localeCompare(nameOf(b)))).map((m) => (
+          <li key={m} className="flex items-center gap-3 px-3.5 py-2.5">
+            <span className="min-w-0 flex-1 truncate">{nameOf(m)}</span>
+            {canRemove && (
+              <form action={removeManager}>
+                <input type="hidden" name="person_id" value={personId} />
+                <input type="hidden" name="user_id" value={m} />
+                <SubmitButton className="btn-ghost min-h-9 px-2 text-sm text-muted" pending="…">{m === userId ? "Leave" : "Remove"}</SubmitButton>
+              </form>
+            )}
+          </li>
+        ))}
+      </ul>
+      {candidates.length > 0 ? (
+        <form action={addManager} className="flex gap-2">
+          <input type="hidden" name="person_id" value={personId} />
+          <select name="user_id" required className="input py-2" defaultValue="">
+            <option value="" disabled>Choose someone you&apos;re paired with</option>
+            {candidates.map((c) => <option key={c.user_id} value={c.user_id}>{c.display_name}</option>)}
+          </select>
+          <SubmitButton className="btn-secondary min-h-11 shrink-0" pending="Adding…">Add</SubmitButton>
+        </form>
+      ) : (
+        <p className="px-1 text-[14px] text-muted">To add another manager, pair with them first in Family &amp; Friends.</p>
+      )}
+    </section>
   );
 }
