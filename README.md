@@ -1,6 +1,6 @@
 # Gift Lists
 
-Family wishlists, gift suggestions and private gift ideas — without spoiling the surprise.
+Wishlists, gift suggestions and private gift ideas for family & friends — without spoiling the surprise.
 Built web-first (works fully in any phone or desktop browser, installable to the home screen),
 and structured so a thin Expo app-store shell can wrap it later.
 
@@ -58,10 +58,10 @@ Supabase's built-in email only delivers to your own team's addresses, and its de
    <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
    <p>Enter this code in Gift Lists to sign in. It expires in an hour.</p>
    ```
-**Invite email.** Also edit the **Invite user** template (used when someone adds a family member who has no account yet). Subject: `{{ .Data.inviter_name }} invited you to Gift Lists`, body:
+**Invite email.** Also edit the **Invite user** template (used when someone invites a person who has no account yet). Subject: `{{ .Data.inviter_name }} invited you to Gift Lists`, body:
    ```html
    <h2>{{ .Data.inviter_name }} invited you to Gift Lists</h2>
-   <p>Our family's wishlists and gift ideas, without spoiling surprises.</p>
+   <p>Wishlists and gift ideas for family &amp; friends, without spoiling surprises.</p>
    <p><a href="{{ .Data.invite_url }}">Open Gift Lists</a></p>
    <p>Sign in with this email address. You'll get a 6-digit code, no password needed.</p>
    ```
@@ -79,7 +79,7 @@ If emails still arrive with a "Sign in" link instead of a code, Supabase isn't u
 4. Back in Supabase → **Authentication → URL Configuration**: set **Site URL** to the Vercel address (e.g. `https://gift-list-app-9oiq.vercel.app`).
 5. Optional: **Settings → Domains** to rename the address or use your own domain (then update the Supabase Site URL).
 
-### 4. Invite the family
+### 4. Invite family & friends
 
 Sign in, pick your name, then **Family & Friends → + Add** to find or invite people by email. Each person can tap **Add Gift Lists to your home screen** for app-like install instructions.
 
