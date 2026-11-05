@@ -21,7 +21,7 @@ export default function Install() {
     <main className="safe-bottom">
       <Header back="/" title="Add to home screen" />
       <div className="space-y-6 px-4 pt-5">
-        <p className="text-[15px] text-muted">Gift Lists works like an app once it&apos;s on your home screen — its own icon, full screen, and you stay signed in.</p>
+        <p className="text-[15px] text-muted">Gift List App works like an app once it&apos;s on your home screen — its own icon, full screen, and you stay signed in.</p>
         <InstallButton />
 
         <section className="card p-4">
@@ -30,7 +30,7 @@ export default function Install() {
             <Step n={1}>Open this site in <strong>Safari</strong>.</Step>
             <Step n={2}>Tap the <strong>Share</strong> button <ShareIcon /> (bottom of the screen, or top-right on iPad).</Step>
             <Step n={3}>Scroll down and tap <strong>Add to Home Screen</strong>.</Step>
-            <Step n={4}>Tap <strong>Add</strong>. Open Gift Lists from your home screen and sign in once.</Step>
+            <Step n={4}>Tap <strong>Add</strong>. Open Gift List App from your home screen and sign in once.</Step>
           </ol>
         </section>
 

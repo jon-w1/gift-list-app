@@ -42,7 +42,7 @@ export default async function Invite({ params }: { params: Promise<{ token: stri
         <>
           <h1 className="mt-5 text-2xl font-bold">This invite link doesn&apos;t work</h1>
           <p className="mt-2 text-muted">Ask for a new one, or pair by email instead.</p>
-          <Link href="/" className="btn-secondary mt-8">Go to Gift Lists</Link>
+          <Link href="/" className="btn-secondary mt-8">Go to Gift List App</Link>
         </>
       )}
     </main>

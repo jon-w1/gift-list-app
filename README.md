@@ -1,4 +1,4 @@
-# Gift Lists
+# Gift List App
 
 Wishlists, gift suggestions and private gift ideas for family & friends — without spoiling the surprise.
 Built web-first (works fully in any phone or desktop browser, installable to the home screen),
@@ -47,22 +47,22 @@ Supabase's built-in email only delivers to your own team's addresses, and its de
 1. Create a Gmail account for the app (e.g. `giftlistapp26@gmail.com`), turn on **2-Step Verification**, then create an **App password** at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
 2. Supabase → **Authentication → Emails → Set up SMTP** → enable custom SMTP:
    - Host `smtp.gmail.com`, Port `465`, Username = the Gmail address, Password = the app password
-   - Sender email = the same Gmail address, Sender name `Gift Lists`
+   - Sender email = the same Gmail address, Sender name `Gift List App`
 3. **Authentication → Rate Limits**: raise "emails sent per hour" to about 30.
 
 *Alternative if you own a domain:* [Resend](https://resend.com) — verify the domain, create an API key, and use Host `smtp.resend.com`, Port `465`, Username `resend`, Password = API key, Sender `gifts@yourdomain.com`. Switching sender later is only a Supabase SMTP settings change.
 
-**Then edit the templates.** **Authentication → Emails → Templates**: edit **both** "Confirm sign up" and "Magic link or OTP" (paste into the **Source** tab, then **Save changes**). Subject: `Your Gift Lists code`, body:
+**Then edit the templates.** **Authentication → Emails → Templates**: edit **both** "Confirm sign up" and "Magic link or OTP" (paste into the **Source** tab, then **Save changes**). Subject: `Your Gift List App code`, body:
    ```html
-   <h2>Your Gift Lists code</h2>
+   <h2>Your Gift List App code</h2>
    <p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
-   <p>Enter this code in Gift Lists to sign in. It expires in an hour.</p>
+   <p>Enter this code in Gift List App to sign in. It expires in an hour.</p>
    ```
-**Invite email.** Also edit the **Invite user** template (used when someone invites a person who has no account yet). Subject: `{{ .Data.inviter_name }} invited you to Gift Lists`, body:
+**Invite email.** Also edit the **Invite user** template (used when someone invites a person who has no account yet). Subject: `{{ .Data.inviter_name }} invited you to Gift List App`, body:
    ```html
-   <h2>{{ .Data.inviter_name }} invited you to Gift Lists</h2>
+   <h2>{{ .Data.inviter_name }} invited you to Gift List App</h2>
    <p>Wishlists and gift ideas for family &amp; friends, without spoiling surprises.</p>
-   <p><a href="{{ .Data.invite_url }}">Open Gift Lists</a></p>
+   <p><a href="{{ .Data.invite_url }}">Open Gift List App</a></p>
    <p>Sign in with this email address. You'll get a 6-digit code, no password needed.</p>
    ```
 
@@ -81,7 +81,7 @@ If emails still arrive with a "Sign in" link instead of a code, Supabase isn't u
 
 ### 4. Invite family & friends
 
-Sign in, pick your name, then **Family & Friends → + Add** to find or invite people by email. Each person can tap **Add Gift Lists to your home screen** for app-like install instructions.
+Sign in, pick your name, then **Family & Friends → + Add** to find or invite people by email. Each person can tap **Install App** (top right of My wishlist) for home-screen install instructions.
 
 ---
 
@@ -103,7 +103,7 @@ The site already follows the rules a thin Expo WebView wrapper needs:
 - Every screen has a real URL (`/p/…`, `/invite/…`) for deep links / universal links.
 - Safe-area insets, in-app back buttons, external links open in a new tab.
 - Native extras are opt-in via `src/lib/native.ts` (`isNativeShell()`, `postToShell()`); nothing depends on them.
-- `/api/unfurl?url=` is a stable endpoint a share-sheet extension can call ("Share → Gift Lists").
+- `/api/unfurl?url=` is a stable endpoint a share-sheet extension can call ("Share → Gift List App").
 - Account deletion is built in (Settings → Delete my account), which Apple requires.
 
 ## Development

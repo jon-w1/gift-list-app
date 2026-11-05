@@ -4,8 +4,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: { default: "Gift List App", template: "%s · Gift List App" },
   description: "Wishlists, gift ideas and suggestions for family & friends — without spoiling the surprise.",
-  applicationName: "Gift Lists",
-  appleWebApp: { capable: true, title: "Gift Lists", statusBarStyle: "default" },
+  applicationName: "Gift List App",
+  appleWebApp: { capable: true, title: "Gift List App", statusBarStyle: "default" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
   formatDetection: { telephone: false },
 };

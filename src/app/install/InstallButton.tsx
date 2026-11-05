@@ -20,11 +20,11 @@ export function InstallButton() {
     return () => window.removeEventListener("beforeinstallprompt", onPrompt);
   }, []);
 
-  if (installed) return <p className="rounded-xl bg-ok-soft px-4 py-3 text-[15px]">✓ Gift Lists is installed on this device.</p>;
+  if (installed) return <p className="rounded-xl bg-ok-soft px-4 py-3 text-[15px]">✓ Gift List App is installed on this device.</p>;
   if (evt)
     return (
       <button className="btn-primary w-full" onClick={async () => { await evt.prompt(); await evt.userChoice; setEvt(null); }}>
-        Install Gift Lists
+        Install Gift List App
       </button>
     );
   return <p className="text-[14px] text-muted">{platform === "ios" ? "Follow the iPhone steps below." : platform === "android" ? "Follow the Android steps below." : "Open this page on your phone to install it."}</p>;
