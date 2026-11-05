@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PHOTO_BUCKET, photoUrl, resizeImage } from "@/lib/photos";
 import { removeItem, saveItem, type ItemInput } from "@/app/actions";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 const looksLikeUrl = (s: string) => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(s.trim());
 
@@ -23,8 +24,6 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const lastFetched = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -90,10 +89,8 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
 
   async function onDelete() {
     if (!initial.id) return;
-    if (!confirmDelete) { setConfirmDelete(true); return; }
-    setDeleting(true);
     const res = await removeItem(initial.id);
-    if (!res.ok) { setDeleting(false); setError(res.error); return; }
+    if (!res.ok) { setError(res.error); return; }
     onDone?.();
     router.refresh();
   }
@@ -156,9 +153,15 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
       {error && <p className="text-sm text-accent">{error}</p>}
 
       {onDone && initial.id && (
-        <button type="button" className="btn-danger w-full" disabled={deleting} onClick={onDelete}>
-          {deleting ? "Deleting…" : confirmDelete ? "Tap again to delete" : "Delete item"}
-        </button>
+        <ConfirmDialog
+          className="btn-danger w-full"
+          label="Delete item"
+          title="Delete this item?"
+          message={`"${initial.name}" will be removed for everyone. It can't be undone.`}
+          confirmLabel="Delete"
+          pendingLabel="Deleting…"
+          onConfirm={onDelete}
+        />
       )}
 
       <div className={onDone

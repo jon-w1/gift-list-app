@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireMe } from "@/lib/supabase/server";
 import { Header } from "@/components/Header";
 import { ItemForm } from "@/components/ItemForm";
-import { SubmitButton } from "@/components/SubmitButton";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { deleteItem } from "@/app/actions";
 import type { Item } from "@/lib/types";
 
@@ -25,7 +25,11 @@ export default async function EditItem({ params }: { params: Promise<{ id: strin
       <form action={deleteItem} className="px-4 pt-8">
         <input type="hidden" name="id" value={item.id} />
         <input type="hidden" name="back" value={back} />
-        <SubmitButton className="btn-danger w-full" pending="Deleting…">Delete item</SubmitButton>
+        <ConfirmDialog
+          className="btn-danger w-full" label="Delete item" title="Delete this item?"
+          message={`"${item.name}" will be removed for everyone. It can't be undone.`}
+          confirmLabel="Delete" pendingLabel="Deleting…"
+        />
       </form>
     </main>
   );

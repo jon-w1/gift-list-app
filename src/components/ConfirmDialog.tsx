@@ -5,21 +5,30 @@ import { createPortal } from "react-dom";
 import { useFormStatus } from "react-dom";
 
 /**
- * A button inside a <form> that opens a confirmation modal first.
- * Confirming submits the surrounding form; Cancel, the backdrop or Escape close it.
+ * A button that opens a confirmation modal first. Confirming runs `onConfirm`, or,
+ * without it, submits the surrounding <form>. Cancel, the backdrop or Escape close it.
  */
-export function ConfirmDialog({ label, className, title, message, confirmLabel, pendingLabel }: {
+export function ConfirmDialog({ label, className, title, message, confirmLabel, pendingLabel, onConfirm }: {
   label: string;
   className: string;
   title: string;
   message: string;
   confirmLabel: string;
   pendingLabel: string;
+  onConfirm?: () => Promise<unknown> | void;
 }) {
   const [open, setOpen] = useState(false);
   const [shown, setShown] = useState(false);
+  const [busy, setBusy] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
-  const { pending } = useFormStatus();
+  const form = useFormStatus();
+  const pending = busy || (!onConfirm && form.pending);
+
+  async function confirm() {
+    if (!onConfirm) return btn.current?.form?.requestSubmit();
+    setBusy(true);
+    try { await onConfirm(); } finally { setBusy(false); setShown(false); setOpen(false); }
+  }
 
   function show() {
     setOpen(true);
@@ -69,7 +78,7 @@ export function ConfirmDialog({ label, className, title, message, confirmLabel, 
                   type="button"
                   className="btn flex-1 bg-accent text-accent-ink"
                   disabled={pending}
-                  onClick={() => btn.current?.form?.requestSubmit()}
+                  onClick={confirm}
                 >
                   {pending ? pendingLabel : confirmLabel}
                 </button>
