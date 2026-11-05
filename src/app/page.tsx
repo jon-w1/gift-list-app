@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { requireMe } from "@/lib/supabase/server";
 import { ITEM_SELECT, normalizeItems } from "@/lib/items";
 import { Empty, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
-import { ItemCard } from "@/components/ItemCard";
+import { OwnItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
 
 /** Home = my own wishlist. Bought status is never shown here (and the database hides it anyway). */
@@ -34,7 +34,7 @@ export default async function Home() {
           <Empty>Your wishlist is empty. Add a few things you&apos;d love.</Empty>
         ) : (
           items.map((item) => (
-            <ItemCard key={item.id} item={item} userId={user.id} canEdit showClaims={false} editHref={`/items/${item.id}/edit`} />
+            <OwnItemCard key={item.id} item={item} editHref={`/items/${item.id}/edit`} />
           ))
         )}
 
