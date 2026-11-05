@@ -66,6 +66,16 @@ export function TabBar({ active }: { active: "home" | "family" }) {
   );
 }
 
+/** "Install App" header link. Hidden once the app is opened from the home screen (already installed). */
+export function InstallLink() {
+  return (
+    <Link href="/install" className="btn-ghost min-h-9 gap-1.5 px-2.5 text-[14px] text-accent [@media(display-mode:standalone)]:hidden">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
+      Install App
+    </Link>
+  );
+}
+
 /** Bottom padding for pages that show the TabBar. */
 export const TAB_PAGE = "pb-[calc(env(safe-area-inset-bottom)+5.5rem)]";
 

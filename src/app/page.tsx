@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireMe } from "@/lib/supabase/server";
 import { ITEM_SELECT, normalizeItems } from "@/lib/items";
-import { Empty, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
+import { Empty, InstallLink, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
 import { OwnItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
 
@@ -21,16 +21,7 @@ export default async function Home() {
 
   return (
     <main className={TAB_PAGE}>
-      <TopBar
-        title="My wishlist"
-        right={
-          // Hidden once opened from the home screen (already installed).
-          <Link href="/install" className="btn-ghost min-h-9 gap-1.5 px-2.5 text-[14px] text-accent [@media(display-mode:standalone)]:hidden">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
-            Install App
-          </Link>
-        }
-      />
+      <TopBar title="My wishlist" right={<InstallLink />} />
 
       <div className="space-y-3 px-4 pt-1">
         <p className="px-1 text-[14px] text-muted">Family &amp; friends can see this list. You&apos;ll never see what&apos;s been bought — no spoilers.</p>

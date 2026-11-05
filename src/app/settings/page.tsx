@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireMe } from "@/lib/supabase/server";
 import { deleteAccount, deleteManagedPerson, removeConnection, renamePerson, signOut } from "@/app/actions";
-import { Avatar, Header } from "@/components/Header";
+import { Avatar, Header, InstallLink } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import type { Person } from "@/lib/types";
 
@@ -26,7 +26,7 @@ export default async function Settings() {
 
   return (
     <main className="safe-bottom">
-      <Header back="/" title="Settings" />
+      <Header back="/" title="Settings" right={<InstallLink />} />
       <div className="space-y-8 px-4 pt-5">
         <section>
           <h2 className="mb-2 font-semibold">Your profile</h2>
@@ -91,7 +91,6 @@ export default async function Settings() {
         </section>
 
         <section className="space-y-2">
-          <Link href="/install" className="btn-secondary w-full">Add to home screen</Link>
           <form action={signOut}><SubmitButton className="btn-secondary w-full" pending="Signing out…">Sign out</SubmitButton></form>
         </section>
 
