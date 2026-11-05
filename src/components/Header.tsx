@@ -27,7 +27,7 @@ export function TopBar({ title, right }: { title: React.ReactNode; right?: React
     <header className="safe-top px-5">
       <div className="flex h-16 items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2.5">
-          <GiftMark size={28} />
+          <span className="shrink-0 max-[359px]:hidden"><GiftMark size={28} /></span>
           <h1 className="truncate text-xl font-bold tracking-tight">{title}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-1">
