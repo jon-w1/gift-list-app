@@ -4,14 +4,14 @@ import { Header } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
 import { EmailPair } from "./EmailPair";
 
-export const metadata = { title: "Add family" };
+export const metadata = { title: "Add family & friends" };
 
 export default async function AddPeople() {
   const { me } = await requireMe();
 
   return (
     <main className="safe-bottom">
-      <Header back="/family" title="Add family" />
+      <Header back="/family" title="Add family & friends" />
       <div className="space-y-8 px-4 pt-5">
         <section>
           <h2 className="font-semibold">Find or invite by email</h2>

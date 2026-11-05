@@ -50,7 +50,6 @@ export default async function PersonPage({ params, searchParams }: {
       canEdit={item.created_by === user.id || (item.kind === "wish" && isManager)}
       showClaims
       showCreator={item.kind === "suggestion"}
-      editHref={`/items/${item.id}/edit`}
     />
   );
 
@@ -108,7 +107,7 @@ export default async function PersonPage({ params, searchParams }: {
             <SectionHead
               title="Suggestions"
               count={suggestions.length}
-              note={`Ideas from family. ${first} can't see these.`}
+              note={`Ideas from family & friends. ${first} can't see these.`}
               add={sheet("suggestion", "+ Suggest", linkBtn)}
             />
             {suggestions.length === 0 ? <Empty>No suggestions yet. Know something {first} would like?</Empty> : suggestions.map(card)}

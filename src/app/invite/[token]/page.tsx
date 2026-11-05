@@ -26,7 +26,7 @@ export default async function Invite({ params }: { params: Promise<{ token: stri
       {inviter ? (
         <>
           <h1 className="mt-5 text-2xl font-bold">{inviter} invited you</h1>
-          <p className="mt-2 max-w-xs text-muted">Share wishlists and gift ideas with the family, without spoiling surprises.</p>
+          <p className="mt-2 max-w-xs text-muted">Share wishlists and gift ideas with family &amp; friends, without spoiling surprises.</p>
           <div className="mt-8 w-full max-w-sm">
             {user ? (
               <form action={acceptInvite}>

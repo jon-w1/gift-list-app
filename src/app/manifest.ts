@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Gift Lists",
     short_name: "Gift Lists",
-    description: "Family wishlists, gift ideas and suggestions.",
+    description: "Wishlists, gift ideas and suggestions for family & friends.",
     start_url: "/",
     scope: "/",
     display: "standalone",

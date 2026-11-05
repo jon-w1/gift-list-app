@@ -26,7 +26,7 @@ export function EmailPair({ myName }: { myName: string }) {
       )}
       {result?.status === "invited" && (
         <p className="rounded-xl bg-ok-soft px-3.5 py-2.5 text-[14px]" role="status">
-          Invite sent to <strong>{result.email}</strong>. They&apos;re in your family now and will show up properly once they sign in.
+          Invite sent to <strong>{result.email}</strong>. They&apos;re in your Family &amp; Friends list now and will show up properly once they sign in.
         </p>
       )}
       {result?.status === "pending" && (

@@ -103,7 +103,7 @@ export async function connectByEmail(_prev: PairResult, formData: FormData): Pro
   const admin = createAdminClient();
   if (!admin) return { ...res, invite_url };
   const { error: sendError } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { inviter_name: me?.display_name ?? "Your family", invite_url },
+    data: { inviter_name: me?.display_name ?? "Someone", invite_url },
   });
   if (sendError) return { ...res, invite_url };
   revalidatePath("/", "layout");
@@ -169,16 +169,29 @@ export async function saveItem(input: ItemInput): Promise<Result & { id?: string
   return { ok: true, id: data.id };
 }
 
+async function removeItemById(supabase: Awaited<ReturnType<typeof createClient>>, id: string) {
+  const { data: item } = await supabase.from("items").select("photo_path").eq("id", id).single();
+  const { error } = await supabase.from("items").delete().eq("id", id);
+  if (!error && item?.photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([item.photo_path]); // best effort
+  revalidatePath("/", "layout");
+  return !error;
+}
+
 export async function deleteItem(formData: FormData) {
   const { supabase } = await uid();
   const id = str(formData.get("id"), 64);
   const back = str(formData.get("back"), 300) ?? "/";
   if (!id) return;
-  const { data: item } = await supabase.from("items").select("photo_path").eq("id", id).single();
-  await supabase.from("items").delete().eq("id", id);
-  if (item?.photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([item.photo_path]); // best effort
-  revalidatePath("/", "layout");
+  await removeItemById(supabase, id);
   redirect(back.startsWith("/") ? back : "/");
+}
+
+/** Delete from inside the item sheet (no navigation). */
+export async function removeItem(id: string): Promise<Result> {
+  const { supabase } = await uid();
+  const clean = str(id, 64);
+  if (!clean) return { ok: false, error: "Couldn't delete that." };
+  return (await removeItemById(supabase, clean)) ? { ok: true } : { ok: false, error: "Couldn't delete that." };
 }
 
 // ───────────────────────────── claims

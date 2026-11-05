@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "Gift Lists", template: "%s · Gift Lists" },
-  description: "Family wishlists, gift ideas and suggestions — without spoiling the surprise.",
+  description: "Wishlists, gift ideas and suggestions for family & friends — without spoiling the surprise.",
   applicationName: "Gift Lists",
   appleWebApp: { capable: true, title: "Gift Lists", statusBarStyle: "default" },
   icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },

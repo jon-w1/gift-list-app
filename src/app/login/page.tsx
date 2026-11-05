@@ -10,7 +10,7 @@ export default function LoginPage() {
       <div className="mt-16 mb-10 flex flex-col items-center text-center">
         <GiftMark size={56} />
         <h1 className="mt-4 text-3xl font-bold tracking-tight">Gift Lists</h1>
-        <p className="mt-2 max-w-xs text-muted">Wishlists and gift ideas for the family. No spoiled surprises.</p>
+        <p className="mt-2 max-w-xs text-muted">Wishlists and gift ideas for family &amp; friends. No spoiled surprises.</p>
       </div>
       <Suspense>
         <LoginForm />

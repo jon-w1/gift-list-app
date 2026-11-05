@@ -56,7 +56,7 @@ export default async function Settings() {
         <section>
           <h2 className="mb-2 font-semibold">Paired with</h2>
           {!paired?.length ? (
-            <p className="text-[15px] text-muted">No one yet. <Link href="/people/add" className="font-semibold text-accent">Add family</Link></p>
+            <p className="text-[15px] text-muted">No one yet. <Link href="/people/add" className="font-semibold text-accent">Add family &amp; friends</Link></p>
           ) : (
             <ul className="card divide-y divide-line">
               {paired.map((p) => (

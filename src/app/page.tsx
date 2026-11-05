@@ -33,7 +33,7 @@ export default async function Home() {
       />
 
       <div className="space-y-3 px-4 pt-1">
-        <p className="px-1 text-[14px] text-muted">Family can see this list. You&apos;ll never see what&apos;s been bought — no spoilers.</p>
+        <p className="px-1 text-[14px] text-muted">Family &amp; friends can see this list. You&apos;ll never see what&apos;s been bought — no spoilers.</p>
         <AddItemSheet
           label="+ Add to wishlist" className="btn-primary w-full" title="Add to my wishlist"
           personId={me.id} kind="wish" userId={user.id} notesPlaceholder="Size, color, model, anything that helps"
@@ -43,7 +43,7 @@ export default async function Home() {
           <Empty>Your wishlist is empty. Add a few things you&apos;d love.</Empty>
         ) : (
           items.map((item) => (
-            <OwnItemCard key={item.id} item={item} editHref={`/items/${item.id}/edit`} />
+            <OwnItemCard key={item.id} item={item} userId={user.id} />
           ))
         )}
       </div>

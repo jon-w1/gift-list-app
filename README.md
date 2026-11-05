@@ -13,7 +13,7 @@ and structured so a thin Expo app-store shell can wrap it later.
 | **Your notepad for <name>** (private ideas) | You | **Only you** |
 
 - **Bought:** "Mark bought" on any wishlist item, suggestion or private idea. Everyone except the recipient sees who bought it, so nobody doubles up.
-- **Layout:** home is your own wishlist; the **Family** tab lists everyone you're paired with. A person's page shows their wishlist with family suggestions stacked underneath, plus a private **Your notepad for <name>** tab.
+- **Layout:** home is your own wishlist; the **Family & Friends** tab lists everyone you're paired with. A person's page shows their wishlist with family suggestions stacked underneath, plus a private **Your notepad for <name>** tab.
 - **Pairing:** **Find or invite by email.** If they have an account you're paired instantly; if not, they're emailed an invite link and you're paired straight away.
 - **People without accounts:** add kids/grandparents you manage. Everyone paired with you can see and shop their lists.
 - **Items:** name, a free-form details box (size, color, notes), optional photo, optional link. Pasting a link fills in the name and picture.
@@ -81,7 +81,7 @@ If emails still arrive with a "Sign in" link instead of a code, Supabase isn't u
 
 ### 4. Invite the family
 
-Sign in, pick your name, then **Family → + Add** to find or invite people by email. Each person can tap **Add Gift Lists to your home screen** for app-like install instructions.
+Sign in, pick your name, then **Family & Friends → + Add** to find or invite people by email. Each person can tap **Add Gift Lists to your home screen** for app-like install instructions.
 
 ---
 

@@ -41,11 +41,11 @@ export function TopBar({ title, right }: { title: React.ReactNode; right?: React
   );
 }
 
-/** Bottom tab bar: My wishlist (home) and Family. */
+/** Bottom tab bar: My wishlist (home) and Family & Friends. */
 export function TabBar({ active }: { active: "home" | "family" }) {
   const tabs = [
     { key: "home", href: "/", label: "My wishlist", icon: <path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM3 7h18v4H3zM12 7v14M12 7c-1.5-3.5-6-4-6-1.5S9.5 7 12 7zm0 0c1.5-3.5 6-4 6-1.5S14.5 7 12 7z" /> },
-    { key: "family", href: "/family", label: "Family", icon: <path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.15a3.5 3.5 0 0 1 0 6.7" /> },
+    { key: "family", href: "/family", label: "Family & Friends", icon: <path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.15a3.5 3.5 0 0 1 0 6.7" /> },
   ] as const;
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-bg/95 backdrop-blur" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>

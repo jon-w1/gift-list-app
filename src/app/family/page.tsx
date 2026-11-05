@@ -4,7 +4,7 @@ import { requireMe } from "@/lib/supabase/server";
 import { Avatar, Empty, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
 import type { Person } from "@/lib/types";
 
-export const metadata = { title: "Family" };
+export const metadata = { title: "Family & Friends" };
 
 export default async function Family() {
   const { supabase, user, me } = await requireMe();
@@ -16,13 +16,13 @@ export default async function Family() {
 
   return (
     <main className={TAB_PAGE}>
-      <TopBar title="Family" right={<Link href="/people/add" className="btn-ghost px-3 text-accent">+ Add</Link>} />
+      <TopBar title="Family & Friends" right={<Link href="/people/add" className="btn-ghost px-3 text-accent">+ Add</Link>} />
 
       <div className="px-4 pt-1">
         {others.length + managed.length === 0 ? (
           <Empty>
-            <p className="mb-3">No one here yet. Pair with family to see their lists.</p>
-            <Link href="/people/add" className="btn-primary">Add family</Link>
+            <p className="mb-3">No one here yet. Pair with family &amp; friends to see their lists.</p>
+            <Link href="/people/add" className="btn-primary">Add family &amp; friends</Link>
           </Empty>
         ) : (
           <ul className="card divide-y divide-line overflow-hidden">

@@ -13,7 +13,7 @@ export default async function Welcome({ searchParams }: { searchParams: Promise<
       <div className="mt-16 mb-8 flex flex-col items-center text-center">
         <GiftMark size={48} />
         <h1 className="mt-4 text-2xl font-bold">Welcome!</h1>
-        <p className="mt-2 text-muted">What should your family call you?</p>
+        <p className="mt-2 text-muted">What should family &amp; friends call you?</p>
       </div>
       <form action={completeOnboarding} className="space-y-3">
         <input type="hidden" name="next" value={next ?? "/"} />

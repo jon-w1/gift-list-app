@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PHOTO_BUCKET, photoUrl, resizeImage } from "@/lib/photos";
-import { saveItem, type ItemInput } from "@/app/actions";
+import { removeItem, saveItem, type ItemInput } from "@/app/actions";
 
 const looksLikeUrl = (s: string) => /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(s.trim());
 
@@ -23,6 +23,8 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const lastFetched = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -86,6 +88,16 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
     router.refresh();
   }
 
+  async function onDelete() {
+    if (!initial.id) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setDeleting(true);
+    const res = await removeItem(initial.id);
+    if (!res.ok) { setDeleting(false); setError(res.error); return; }
+    onDone?.();
+    router.refresh();
+  }
+
   const preview = photoUrl(v.photo_path) ?? v.image_url;
 
   return (
@@ -142,6 +154,12 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
       </div>
 
       {error && <p className="text-sm text-accent">{error}</p>}
+
+      {onDone && initial.id && (
+        <button type="button" className="btn-danger w-full" disabled={deleting} onClick={onDelete}>
+          {deleting ? "Deleting…" : confirmDelete ? "Tap again to delete" : "Delete item"}
+        </button>
+      )}
 
       <div className={onDone
         ? "sticky bottom-0 -mx-4 flex gap-3 border-t border-line bg-bg px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)]"

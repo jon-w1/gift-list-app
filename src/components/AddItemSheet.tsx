@@ -3,21 +3,24 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ItemForm } from "./ItemForm";
+import type { ItemInput } from "@/app/actions";
 import type { ItemKind } from "@/lib/types";
 
+type Note = { text: string; tone: "warn" | "soft" };
+
 /**
- * "Add" button that opens the item form in a slide-up sheet instead of a new page.
- * The /p/[id]/new page still exists for direct links.
+ * A button (any content) that opens the item form in a slide-up sheet.
+ * Used for adding and editing; /p/[id]/new and /items/[id]/edit still work as pages for direct links.
  */
-export function AddItemSheet({ label, className, title, personId, kind, userId, notesPlaceholder, note }: {
-  label: React.ReactNode;
+export function ItemSheet({ children, className, ariaLabel, title, userId, notesPlaceholder, note, initial }: {
+  children: React.ReactNode;
   className: string;
+  ariaLabel?: string;
   title: string;
-  personId: string;
-  kind: ItemKind;
   userId: string;
   notesPlaceholder: string;
-  note?: { text: string; tone: "warn" | "soft" };
+  note?: Note;
+  initial: ItemInput;
 }) {
   const [open, setOpen] = useState(false); // mounted
   const [shown, setShown] = useState(false); // slid up
@@ -47,7 +50,7 @@ export function AddItemSheet({ label, className, title, personId, kind, userId, 
 
   return (
     <>
-      <button type="button" className={className} onClick={show}>{label}</button>
+      <button type="button" className={className} onClick={show} aria-label={ariaLabel}>{children}</button>
       {open &&
         createPortal(
           <div className="fixed inset-0 z-50">
@@ -74,18 +77,32 @@ export function AddItemSheet({ label, className, title, personId, kind, userId, 
               {note && (
                 <p className={`mx-4 mt-1 rounded-xl px-3.5 py-2.5 text-[14px] ${note.tone === "warn" ? "bg-warn-soft" : "bg-soft"}`}>{note.text}</p>
               )}
-              <ItemForm
-                key={round}
-                userId={userId}
-                backHref="/"
-                onDone={hide}
-                notesPlaceholder={notesPlaceholder}
-                initial={{ person_id: personId, kind, name: "", notes: "", url: "", image_url: null, photo_path: null }}
-              />
+              <ItemForm key={round} userId={userId} backHref="/" onDone={hide} notesPlaceholder={notesPlaceholder} initial={initial} />
             </div>
           </div>,
           document.body,
         )}
     </>
+  );
+}
+
+/** "+ Add" button that opens an empty item form in the sheet. */
+export function AddItemSheet({ label, className, title, personId, kind, userId, notesPlaceholder, note }: {
+  label: React.ReactNode;
+  className: string;
+  title: string;
+  personId: string;
+  kind: ItemKind;
+  userId: string;
+  notesPlaceholder: string;
+  note?: Note;
+}) {
+  return (
+    <ItemSheet
+      className={className} title={title} userId={userId} notesPlaceholder={notesPlaceholder} note={note}
+      initial={{ person_id: personId, kind, name: "", notes: "", url: "", image_url: null, photo_path: null }}
+    >
+      {label}
+    </ItemSheet>
   );
 }

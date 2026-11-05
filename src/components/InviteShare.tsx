@@ -11,7 +11,7 @@ export function InviteShare({ url, name, label = "Share my invite link" }: { url
         type="button"
         className="btn-primary w-full"
         onClick={async () => {
-          const r = await shareLink(url, `${name} invited you to Gift Lists — our family wishlists.`);
+          const r = await shareLink(url, `${name} invited you to Gift Lists — wishlists for family & friends.`);
           setNote(r === "copied" ? "Link copied — paste it in a text." : r === "failed" ? url : null);
         }}
       >
