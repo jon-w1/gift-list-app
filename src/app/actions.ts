@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PHOTO_BUCKET } from "@/lib/photos";
 import type { ItemKind } from "@/lib/types";
+import { parseBirthday } from "@/lib/birthday";
 
 type Result = { ok: true } | { ok: false; error: string };
 
@@ -38,7 +39,7 @@ export async function completeOnboarding(formData: FormData) {
   const { supabase, userId } = await uid();
   const name = str(formData.get("display_name"), 60);
   if (!name) return;
-  await supabase.from("people").update({ display_name: name, onboarded: true }).eq("user_id", userId);
+  await supabase.from("people").update({ display_name: name, birthday: parseBirthday(formData.get("birthday")), onboarded: true }).eq("user_id", userId);
   redirect(str(formData.get("next"), 500)?.startsWith("/") ? String(formData.get("next")) : "/");
 }
 
@@ -47,7 +48,9 @@ export async function renamePerson(formData: FormData) {
   const id = str(formData.get("id"), 64);
   const name = str(formData.get("display_name"), 60);
   if (!id || !name) return;
-  await supabase.from("people").update({ display_name: name }).eq("id", id);
+  const patch: { display_name: string; birthday?: string | null } = { display_name: name };
+  if (formData.has("birthday")) patch.birthday = parseBirthday(formData.get("birthday"));
+  await supabase.from("people").update(patch).eq("id", id);
   revalidatePath("/", "layout");
 }
 
@@ -55,7 +58,7 @@ export async function addManagedPerson(formData: FormData) {
   const { supabase, userId } = await uid();
   const name = str(formData.get("display_name"), 60);
   if (!name) return;
-  const { data } = await supabase.from("people").insert({ display_name: name, managed_by: userId }).select("id").single();
+  const { data } = await supabase.from("people").insert({ display_name: name, managed_by: userId, birthday: parseBirthday(formData.get("birthday")) }).select("id").single();
   revalidatePath("/", "layout");
   if (data) redirect(`/p/${data.id}`);
 }

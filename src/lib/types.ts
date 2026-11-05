@@ -7,6 +7,7 @@ export type Person = {
   display_name: string;
   email: string | null;
   onboarded: boolean;
+  birthday: string | null;
   created_at: string;
 };
 

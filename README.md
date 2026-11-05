@@ -16,6 +16,7 @@ and structured so a thin Expo app-store shell can wrap it later.
 - **Layout:** home is your own wishlist; the **Family & Friends** tab lists everyone you're paired with. A person's page shows their wishlist with family suggestions stacked underneath, plus a private **Your notepad for <name>** tab.
 - **Pairing:** **Find or invite by email.** If they have an account you're paired instantly; if not, they're emailed an invite link and you're paired straight away.
 - **People without accounts:** add kids/grandparents you manage (**Add a child or other profile**). A profile can have several **managers** (e.g. both parents): any manager can edit the wishlist and add or remove other managers (never the last one). Everyone paired with *any* manager can see and shop the list.
+- **Birthdays (optional):** set on the welcome screen or in Settings (and for kids you manage). Paired people see the date and how many days away it is; ages are shown only for managed profiles like kids.
 - **Items:** name, a free-form details box (size, color, notes), optional photo, optional link. Pasting a link fills in the name and picture.
 - **Sign-in:** email + 6-digit code. No passwords.
 
@@ -120,7 +121,7 @@ Requires a local Postgres 15+:
 
 ```bash
 createdb gifttest
-psql -d gifttest -f tests/db/supabase_stub.sql -f supabase/migrations/0001_init.sql -f supabase/migrations/0003_single_bought_state.sql -f supabase/migrations/0004_co_managers.sql
+psql -d gifttest -f tests/db/supabase_stub.sql -f supabase/migrations/0001_init.sql -f supabase/migrations/0003_single_bought_state.sql -f supabase/migrations/0004_co_managers.sql -f supabase/migrations/0005_birthday.sql
 psql -d gifttest -f tests/db/privacy_test.sql -f tests/db/comanager_test.sql   # ends with "ALL CO-MANAGER TESTS PASSED"
 ```
 

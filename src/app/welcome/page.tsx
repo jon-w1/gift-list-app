@@ -5,6 +5,8 @@ import { GiftMark } from "@/components/Header";
 
 export const metadata = { title: "Welcome" };
 
+const today = () => new Date().toISOString().slice(0, 10);
+
 export default async function Welcome({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { me } = await requireMe();
   const { next } = await searchParams;
@@ -17,7 +19,12 @@ export default async function Welcome({ searchParams }: { searchParams: Promise<
       </div>
       <form action={completeOnboarding} className="space-y-3">
         <input type="hidden" name="next" value={next ?? "/"} />
-        <input name="display_name" className="input" required maxLength={60} defaultValue={me.onboarded ? me.display_name : ""} placeholder="e.g. Grandma, Uncle Mike, Sarah" autoFocus />
+        <input name="display_name" className="input" required maxLength={60} defaultValue={me.onboarded ? me.display_name : ""} placeholder="e.g. Grandma, Uncle Mike, Sarah" aria-label="Your name" autoFocus />
+        <div className="pt-2">
+          <label className="label" htmlFor="birthday">Birthday <span className="font-normal">(optional)</span></label>
+          <input id="birthday" name="birthday" type="date" className="input" max={today()} defaultValue={me.birthday ?? ""} />
+          <p className="mt-1.5 px-1 text-sm text-muted">People you&apos;re paired with see the date, not your age.</p>
+        </div>
         <SubmitButton className="btn-primary w-full">Continue</SubmitButton>
       </form>
     </main>

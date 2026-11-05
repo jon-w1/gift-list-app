@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { addManager, removeManager, removePerson } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { Item, Person } from "@/lib/types";
+import { birthdayLine } from "@/lib/birthday";
 
 type Tab = "list" | "ideas";
 
@@ -85,6 +86,9 @@ export default async function PersonPage({ params, searchParams }: {
   return (
     <main className="safe-bottom">
       <Header back="/family" title={person.display_name} />
+      {person.birthday && (
+        <p className="px-5 pt-3 text-[14px] font-medium text-muted">🎂 {birthdayLine(person.birthday, isManaged)}</p>
+      )}
 
       <nav className="flex gap-1 px-4 pt-3" aria-label="Lists">
         {tabs.map((t) => (

@@ -7,6 +7,8 @@ import type { Person } from "@/lib/types";
 
 export const metadata = { title: "Settings" };
 
+const today = () => new Date().toISOString().slice(0, 10);
+
 export default async function Settings() {
   const { supabase, user, me } = await requireMe();
   const [{ data: conns }, { data: mine }] = await Promise.all([
@@ -27,11 +29,18 @@ export default async function Settings() {
       <Header back="/" title="Settings" />
       <div className="space-y-8 px-4 pt-5">
         <section>
-          <h2 className="mb-2 font-semibold">Your name</h2>
-          <form action={renamePerson} className="flex gap-2">
+          <h2 className="mb-2 font-semibold">Your profile</h2>
+          <form action={renamePerson} className="space-y-3">
             <input type="hidden" name="id" value={me.id} />
-            <input name="display_name" required maxLength={60} defaultValue={me.display_name} className="input" />
-            <SubmitButton className="btn-secondary shrink-0">Save</SubmitButton>
+            <div>
+              <label className="label" htmlFor="me-name">Name</label>
+              <input id="me-name" name="display_name" required maxLength={60} defaultValue={me.display_name} className="input" />
+            </div>
+            <div>
+              <label className="label" htmlFor="me-birthday">Birthday <span className="font-normal">(optional, people you&apos;re paired with see the date)</span></label>
+              <input id="me-birthday" name="birthday" type="date" max={today()} defaultValue={me.birthday ?? ""} className="input" />
+            </div>
+            <SubmitButton className="btn-secondary w-full">Save</SubmitButton>
           </form>
           <p className="mt-1.5 px-1 text-sm text-muted">Signed in as {me.email}</p>
         </section>
@@ -42,10 +51,14 @@ export default async function Settings() {
             <ul className="card divide-y divide-line">
               {managed.map((p) => (
                 <li key={p.id} className="space-y-2 p-3.5">
-                  <form action={renamePerson} className="flex gap-2">
+                  <form action={renamePerson} className="space-y-2">
                     <input type="hidden" name="id" value={p.id} />
-                    <input name="display_name" required maxLength={60} defaultValue={p.display_name} className="input py-2" />
-                    <SubmitButton className="btn-secondary min-h-10 shrink-0">Save</SubmitButton>
+                    <input name="display_name" required maxLength={60} defaultValue={p.display_name} className="input py-2" aria-label={`${p.display_name}'s name`} />
+                    <div className="flex items-center gap-2">
+                      <label className="shrink-0 text-sm text-muted" htmlFor={`bday-${p.id}`}>Birthday</label>
+                      <input id={`bday-${p.id}`} name="birthday" type="date" max={today()} defaultValue={p.birthday ?? ""} className="input py-2" />
+                      <SubmitButton className="btn-secondary min-h-10 shrink-0">Save</SubmitButton>
+                    </div>
                   </form>
                   <form action={deleteManagedPerson}>
                     <input type="hidden" name="id" value={p.id} />
