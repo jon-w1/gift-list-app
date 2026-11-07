@@ -40,6 +40,19 @@ function findProduct(node: unknown): Record<string, unknown> | null {
   return findProduct(obj["@graph"]);
 }
 
+/** Amazon product pages: the main image's hi-res URL, or the largest in data-a-dynamic-image. */
+function amazonMainImage($: cheerio.CheerioAPI) {
+  const img = $("#landingImage, #imgBlkFront, #ebooksImgBlkFront").first();
+  const hires = img.attr("data-old-hires");
+  if (hires?.trim()) return hires.trim();
+  try {
+    const sizes = JSON.parse(img.attr("data-a-dynamic-image") ?? "{}") as Record<string, [number, number]>;
+    return Object.entries(sizes).sort((a, b) => b[1][0] * b[1][1] - a[1][0] * a[1][1])[0]?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function parseHtml(html: string, pageUrl: string): Unfurled {
   const $ = cheerio.load(html);
   const meta = (...keys: string[]) => {
@@ -68,7 +81,7 @@ export function parseHtml(html: string, pageUrl: string): Unfurled {
     (p?.name as string) || meta("og:title", "twitter:title") || $("#productTitle").text().trim() || $("title").first().text(),
   );
   const image_url = absolute(
-    meta("og:image:secure_url", "og:image", "twitter:image") ?? ldImageUrl ?? $("#landingImage").attr("data-old-hires") ?? null,
+    meta("og:image:secure_url", "og:image", "twitter:image") ?? ldImageUrl ?? amazonMainImage($) ?? null,
     pageUrl,
   );
   const price =

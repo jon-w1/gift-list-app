@@ -3,6 +3,7 @@ import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { createClient } from "@/lib/supabase/server";
 import { nameFromUrl, parseHtml, tidyName, type Unfurled } from "@/lib/unfurl/parse";
+import { amazonImage } from "@/lib/photos";
 
 /**
  * GET /api/unfurl?url=…  → { name, image_url, price, url, details }
@@ -93,6 +94,9 @@ export async function GET(req: NextRequest) {
   // Stores that block bots (e.g. Amazon) return a captcha page titled "Amazon.com" etc.
   const looksBlocked = !result.name || /^(amazon(\.com)?|robot check|access denied|just a moment\.*)$/i.test(result.name);
   if (looksBlocked) result.name = nameFromUrl(result.url) ?? nameFromUrl(target.toString());
+
+  // Amazon often blocks the page itself; its image address can still be built from the product ID.
+  if (!result.image_url) result.image_url = amazonImage(result.url) ?? amazonImage(target.toString());
 
   const tidy = tidyName(result.name, result.url, result.site_name);
   result = { ...result, name: tidy.name, details: tidy.details };

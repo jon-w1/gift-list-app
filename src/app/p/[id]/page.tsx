@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { requireMe } from "@/lib/supabase/server";
 import { ITEM_SELECT, normalizeItems } from "@/lib/items";
 import { Empty, Header } from "@/components/Header";
-import { ItemCard } from "@/components/ItemCard";
+import { ItemRow } from "@/components/ItemRow";
 import { AddItemSheet } from "@/components/AddItemSheet";
 import { SubmitButton } from "@/components/SubmitButton";
 import { addManager, removeManager, removePerson } from "@/app/actions";
@@ -53,15 +53,19 @@ export default async function PersonPage({ params, searchParams }: {
   }
 
   const card = (item: Item) => (
-    <ItemCard
+    <ItemRow
       key={item.id}
       item={item}
       userId={user.id}
       canEdit={item.created_by === user.id || (item.kind === "wish" && isManager)}
-      showClaims
       showCreator={item.kind === "suggestion"}
     />
   );
+  // Still-needed items first, bought ones sink to the bottom.
+  const byNeeded = (a: Item, b: Item) => Number(!!a.claim) - Number(!!b.claim);
+  wishes.sort(byNeeded);
+  suggestions.sort(byNeeded);
+  ideas.sort(byNeeded);
 
   const sheet = (kind: "wish" | "suggestion" | "idea", label: string, className: string) => (
     <AddItemSheet
@@ -106,7 +110,7 @@ export default async function PersonPage({ params, searchParams }: {
 
       {tab === "list" ? (
         <div className="space-y-7 px-4 pt-4">
-          <section className="space-y-3">
+          <section className="space-y-2">
             <SectionHead
               title={`${first}'s wishlist`}
               count={wishes.length}
@@ -116,7 +120,7 @@ export default async function PersonPage({ params, searchParams }: {
             {wishes.length === 0 ? <Empty>{first} hasn&apos;t added anything yet.</Empty> : wishes.map(card)}
           </section>
 
-          <section className="space-y-3">
+          <section className="space-y-2">
             <SectionHead
               title="Suggestions"
               count={suggestions.length}
