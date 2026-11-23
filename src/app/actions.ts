@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, currentUserId } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PHOTO_BUCKET } from "@/lib/photos";
 import type { ItemKind } from "@/lib/types";
@@ -13,9 +13,9 @@ type Result = { ok: true } | { ok: false; error: string };
 
 async function uid() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  return { supabase, userId: user.id };
+  const userId = await currentUserId(supabase);
+  if (!userId) redirect("/login");
+  return { supabase, userId };
 }
 
 const str = (v: unknown, max: number) => {

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, currentUserId } from "@/lib/supabase/server";
 import { nameFromUrl, parseHtml, tidyName, type Unfurled } from "@/lib/unfurl/parse";
 import { amazonImage } from "@/lib/photos";
 
@@ -69,8 +69,7 @@ async function readCapped(res: Response, max = 1_500_000) {
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
+  if (!(await currentUserId(supabase))) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
 
   const raw = req.nextUrl.searchParams.get("url")?.trim() ?? "";
   let target: URL;

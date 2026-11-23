@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireMe } from "@/lib/supabase/server";
-import { Avatar, Empty, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
+import { Avatar, Empty, TopBar } from "@/components/Header";
 import type { Person } from "@/lib/types";
 import { describeBirthday } from "@/lib/birthday";
 
@@ -20,7 +20,7 @@ export default async function Family() {
   const others = (people ?? []).filter((p) => !managedIds.has(p.id));
 
   return (
-    <main className={TAB_PAGE}>
+    <main>
       <TopBar title="Family & Friends" right={<Link href="/people/add" className="btn-ghost px-3 text-accent">+ Add</Link>} />
 
       <div className="px-4 pt-1">
@@ -51,8 +51,6 @@ export default async function Family() {
           </ul>
         )}
       </div>
-
-      <TabBar active="family" />
     </main>
   );
 }

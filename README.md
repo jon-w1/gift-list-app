@@ -76,7 +76,7 @@ If emails still arrive with a "Sign in" link instead of a code, Supabase isn't u
    - `NEXT_PUBLIC_SUPABASE_URL` = Supabase Project URL
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = Supabase publishable (or anon) key
    - `SUPABASE_SERVICE_ROLE_KEY` = Supabase **secret** (service_role) key, used only on the server to email invites. Optional: without it, inviting by email still saves the pairing and offers a shareable invite link instead. Never give it a `NEXT_PUBLIC_` prefix.
-3. **Deploy** (or **Redeploy** after changing variables). Every change pushed to GitHub redeploys automatically.
+3. **Deploy** (or **Redeploy** after changing variables). `vercel.json` pins the server to `pdx1` (Portland) to sit next to a Supabase project in West US (Oregon); if your Supabase region differs, change it to the closest [Vercel region](https://vercel.com/docs/regions). Every change pushed to GitHub redeploys automatically.
 4. Back in Supabase → **Authentication → URL Configuration**: set **Site URL** to the Vercel address (e.g. `https://gift-list-app-9oiq.vercel.app`).
 5. Optional: **Settings → Domains** to rename the address or use your own domain (then update the Supabase Site URL).
 

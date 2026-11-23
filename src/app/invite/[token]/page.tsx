@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, currentUserId } from "@/lib/supabase/server";
 import { acceptInvite } from "@/app/actions";
 import { GiftMark } from "@/components/Header";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -13,7 +13,8 @@ export default async function Invite({ params }: { params: Promise<{ token: stri
   const { token } = await params;
   const supabase = await createClient();
   const inviter = UUID.test(token) ? (await supabase.rpc("invite_preview", { invite_token: token })).data as string | null : null;
-  const { data: { user } } = await supabase.auth.getUser();
+  const userId = await currentUserId(supabase);
+  const user = userId ? { id: userId } : null;
 
   if (user) {
     const { data: me } = await supabase.from("people").select("onboarded").eq("user_id", user.id).single();

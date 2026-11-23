@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useOptimistic, useState } from "react";
 import { claimItem, unclaimItem, type ItemInput } from "@/app/actions";
 import { itemImages } from "@/lib/photos";
 import type { Item } from "@/lib/types";
@@ -26,9 +26,14 @@ export function ItemRow({ item, userId, canEdit, showCreator }: {
 }) {
   const sheet = useSheet();
   const [mode, setMode] = useState<"view" | "edit">("view");
-  const claim = item.claim;
-  const mine = claim?.claimed_by === userId;
-  const boughtByOther = !!claim && !mine;
+  // Bought status flips the instant you tap; the server's answer then confirms it.
+  const actual: "none" | "mine" | "other" = !item.claim ? "none" : item.claim.claimed_by === userId ? "mine" : "other";
+  const [status, setStatus] = useOptimistic(actual);
+  const buy = async (fd: FormData) => { setStatus("mine"); await claimItem(fd); };
+  const undo = async (fd: FormData) => { setStatus("none"); await unclaimItem(fd); };
+  const claim = status === "none" ? null : item.claim;
+  const mine = status === "mine";
+  const boughtByOther = status === "other";
   const meta = [
     showCreator && item.creator && `from ${firstName(item.creator.display_name)}`,
     item.url && host(item.url),
@@ -44,20 +49,20 @@ export function ItemRow({ item, userId, canEdit, showCreator }: {
         <button type="button" onClick={() => { setMode("view"); sheet.show(); }} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-0.5 text-left active:bg-soft" aria-label={`Details for ${item.name}`}>
           <Thumb sources={itemImages(item)} className="h-14 w-14 shrink-0 rounded-xl" />
           <span className="block min-w-0 flex-1">
-            <span className={`line-clamp-2 text-[15px] leading-snug font-semibold break-words ${claim ? "text-muted" : ""}`}>{item.name}</span>
+            <span className={`line-clamp-2 text-[15px] leading-snug font-semibold break-words ${status !== "none" ? "text-muted" : ""}`}>{item.name}</span>
             {meta && <span className="mt-0.5 block truncate text-[13px] text-muted">{meta}</span>}
           </span>
         </button>
         <div className="shrink-0">
-          {!claim ? (
-            <form action={claimItem}>
+          {status === "none" ? (
+            <form action={buy}>
               <input type="hidden" name="item_id" value={item.id} />
               <SubmitButton className="btn min-h-9 border border-accent/40 px-3 text-[13px] text-accent" pending="…">Mark bought</SubmitButton>
             </form>
           ) : mine ? (
             <span className="text-[13px] font-semibold text-ok">✓ You</span>
           ) : (
-            <span className="text-[13px] font-medium text-muted">✓ {firstName(claim.claimer?.display_name)}</span>
+            <span className="text-[13px] font-medium text-muted">✓ {firstName(claim?.claimer?.display_name)}</span>
           )}
         </div>
       </div>
@@ -79,20 +84,20 @@ export function ItemRow({ item, userId, canEdit, showCreator }: {
               <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn-secondary w-full">Open on {host(item.url)} ↗</a>
             )}
             <div className="rounded-2xl bg-soft px-4 py-3">
-              {!claim ? (
-                <form action={claimItem} className="flex items-center gap-3">
+              {status === "none" ? (
+                <form action={buy} className="flex items-center gap-3">
                   <span className="flex-1 text-[14px] text-muted">Not bought yet</span>
                   <input type="hidden" name="item_id" value={item.id} />
                   <SubmitButton className="btn-primary min-h-10 px-4 text-sm" pending="…">Mark bought</SubmitButton>
                 </form>
               ) : mine ? (
-                <form action={unclaimItem} className="flex items-center gap-3">
+                <form action={undo} className="flex items-center gap-3">
                   <span className="flex-1 text-[14px] font-semibold text-ok">✓ You bought this</span>
                   <input type="hidden" name="item_id" value={item.id} />
                   <SubmitButton className="btn-ghost min-h-10 px-3 text-sm text-muted" pending="…">Undo</SubmitButton>
                 </form>
               ) : (
-                <p className="text-[14px] font-medium text-muted">✓ Bought by {claim.claimer?.display_name ?? "someone"}</p>
+                <p className="text-[14px] font-medium text-muted">✓ Bought by {claim?.claimer?.display_name ?? "someone"}</p>
               )}
             </div>
             {canEdit && <button type="button" className="btn-ghost w-full text-muted" onClick={() => setMode("edit")}>Edit item</button>}

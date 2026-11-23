@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -23,12 +24,26 @@ export async function createClient() {
   );
 }
 
-/** Signed-in user + their own person row. Redirects to /login if signed out. */
-export async function requireMe() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  const { data: me } = await supabase.from("people").select("*").eq("user_id", user.id).single<Person>();
-  if (!me) redirect("/login");
-  return { supabase, user, me };
+/**
+ * The signed-in user's id, or null. Uses getClaims(): with Supabase's asymmetric signing
+ * keys the token is verified on the server itself (no network trip to Supabase Auth);
+ * with older symmetric keys it falls back to asking Auth, like getUser().
+ */
+export async function currentUserId(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data } = await supabase.auth.getClaims();
+  const sub = data?.claims?.sub;
+  return typeof sub === "string" && sub ? sub : null;
 }
+
+/**
+ * Signed-in user + their own person row. Redirects to /login if signed out.
+ * Cached per request, so pages and the components inside them share one lookup.
+ */
+export const requireMe = cache(async () => {
+  const supabase = await createClient();
+  const id = await currentUserId(supabase);
+  if (!id) redirect("/login");
+  const { data: me } = await supabase.from("people").select("*").eq("user_id", id).single<Person>();
+  if (!me) redirect("/login");
+  return { supabase, user: { id }, me };
+});

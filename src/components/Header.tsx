@@ -41,31 +41,6 @@ export function TopBar({ title, right }: { title: React.ReactNode; right?: React
   );
 }
 
-/** Bottom tab bar: My wishlist (home) and Family & Friends. */
-export function TabBar({ active }: { active: "home" | "family" }) {
-  const tabs = [
-    { key: "home", href: "/", label: "My wishlist", icon: <path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM3 7h18v4H3zM12 7v14M12 7c-1.5-3.5-6-4-6-1.5S9.5 7 12 7zm0 0c1.5-3.5 6-4 6-1.5S14.5 7 12 7z" /> },
-    { key: "family", href: "/family", label: "Family & Friends", icon: <path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM20 20v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.15a3.5 3.5 0 0 1 0 6.7" /> },
-  ] as const;
-  return (
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-bg/95 backdrop-blur" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
-      <div className="mx-auto flex max-w-xl">
-        {tabs.map((t) => (
-          <Link
-            key={t.key}
-            href={t.href}
-            aria-current={active === t.key ? "page" : undefined}
-            className={`flex flex-1 flex-col items-center gap-0.5 pt-2 pb-1.5 text-[12px] font-semibold ${active === t.key ? "text-accent" : "text-muted"}`}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{t.icon}</svg>
-            {t.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
-  );
-}
-
 /** "Install App" header link. Hidden once the app is opened from the home screen (already installed). */
 export function InstallLink() {
   return (
@@ -78,6 +53,23 @@ export function InstallLink() {
 
 /** Bottom padding for pages that show the TabBar. */
 export const TAB_PAGE = "pb-[calc(env(safe-area-inset-bottom)+5.5rem)]";
+
+/** Grey placeholder shown instantly while a page loads. */
+export function SkeletonRows({ count = 5, thumb = "h-14 w-14" }: { count?: number; thumb?: string }) {
+  return (
+    <div className="space-y-2" aria-hidden="true">
+      {Array.from({ length: count }, (_, i) => (
+        <div key={i} className="card flex items-center gap-3 p-2.5">
+          <div className={`${thumb} shrink-0 animate-pulse rounded-xl bg-soft`} />
+          <div className="flex-1 space-y-2">
+            <div className="h-3.5 w-3/4 animate-pulse rounded bg-soft" />
+            <div className="h-3 w-1/2 animate-pulse rounded bg-soft" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function GiftMark({ size = 28 }: { size?: number }) {
   return (

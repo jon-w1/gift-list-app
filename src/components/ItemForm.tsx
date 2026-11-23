@@ -82,17 +82,18 @@ export function ItemForm({ initial, userId, backHref, notesPlaceholder, onDone }
       setError(res.error);
       return;
     }
+    // saveItem revalidates on the server, which already refreshes the visible list:
+    // no second router.refresh() round trip needed.
     if (onDone) onDone();
     else router.replace(backHref);
-    router.refresh();
   }
 
   async function onDelete() {
     if (!initial.id) return;
     const res = await removeItem(initial.id);
     if (!res.ok) { setError(res.error); return; }
-    onDone?.();
-    router.refresh();
+    if (onDone) onDone();
+    else router.replace(backHref);
   }
 
   const preview = photoUrl(v.photo_path) ?? v.image_url;

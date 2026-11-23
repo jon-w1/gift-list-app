@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireMe } from "@/lib/supabase/server";
 import { ITEM_SELECT, normalizeItems } from "@/lib/items";
-import { Empty, InstallLink, TAB_PAGE, TabBar, TopBar } from "@/components/Header";
+import { Empty, InstallLink, TopBar } from "@/components/Header";
 import { OwnItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
 
@@ -19,7 +19,7 @@ export default async function Home() {
   const items = normalizeItems(data);
 
   return (
-    <main className={TAB_PAGE}>
+    <main>
       <TopBar title="My wishlist" right={<InstallLink />} />
 
       <div className="space-y-3 px-4 pt-1">
@@ -37,8 +37,6 @@ export default async function Home() {
           ))
         )}
       </div>
-
-      <TabBar active="home" />
     </main>
   );
 }
