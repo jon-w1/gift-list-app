@@ -61,8 +61,10 @@ export default async function PersonPage({ params, searchParams }: {
       showCreator={item.kind === "suggestion"}
     />
   );
-  // Still-needed items first, bought ones sink to the bottom.
-  const byNeeded = (a: Item, b: Item) => Number(!!a.claim) - Number(!!b.claim);
+  // Still needed first, then things you bought, then things others bought.
+  // (Array sort is stable, so each group keeps its newest-first order.)
+  const rank = (i: Item) => (!i.claim ? 0 : i.claim.claimed_by === user.id ? 1 : 2);
+  const byNeeded = (a: Item, b: Item) => rank(a) - rank(b);
   wishes.sort(byNeeded);
   suggestions.sort(byNeeded);
   ideas.sort(byNeeded);
